@@ -1,15 +1,30 @@
-apply plugin: 'java'
-apply plugin: 'application'
+plugins {
+    id 'java'
+    id 'application'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories{
+    mavenCentral()
     maven { url "https://raw.githubusercontent.com/acmi/L2MvnRepo/master" }
 }
 
 dependencies{
-    compile group:'acmi.l2.clientmod', name:'l2io', version: '2.2.+'
-    compile group:'acmi.util', name:'autocomletecombobox', version: '1.1'
-    compile group:'gr.zdimensions', name:'jsquish', version: '1.0'
+    implementation group:'acmi.l2.clientmod', name:'l2io', version: '2.2.+'
+    implementation group:'acmi.util', name:'autocomletecombobox', version: '1.1'
+    implementation group:'gr.zdimensions', name:'jsquish', version: '1.0'
 }
+
+// JavaFX configuration
+def javaFxVersion = '17.0.2'
+def javaFxPath = file("javafx/javafx-sdk-${javaFxVersion}/lib")
+
+// Add JavaFX JARs to compile classpath
+sourceSets.main.compileClasspath += files(javaFxPath.listFiles().findAll { it.name.endsWith('.jar') })
 
 mainClassName = "acmi.l2.clientmod.l2tool.L2Tool"
 
@@ -19,6 +34,6 @@ jar {
     }
 
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }

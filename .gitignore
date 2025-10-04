@@ -8,3 +8,7 @@ build/
 
 # Mac
 .DS_Store
+/bin/
+
+# JavaFX SDK (keep the zip file, ignore the extracted folder)
+javafx/javafx-sdk-17.0.2/
