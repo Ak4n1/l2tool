@@ -52,6 +52,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import javax.imageio.ImageIO;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -96,6 +97,8 @@ public class Controller implements Initializable {
     private final StringProperty uedInitialDirectory = new SimpleStringProperty(L2Tool.getPrefs().get(KEY_UED_INITIAL_DIRECTORY, null));
     @FXML
     private Button view;
+    @FXML
+    private Button exportAll;
 
     @FXML
     private ProgressIndicator progress;
@@ -130,6 +133,7 @@ public class Controller implements Initializable {
         textureInfo.disableProperty().bind(textureNotSelected);
         view.disableProperty().bind(textureNotSelected);
         set.disableProperty().bind(imgProperty.isNull().or(textureInfoProperty.isNull()));
+        exportAll.disableProperty().bind(utxPathProperty.isNull());
         utxPathProperty.addListener((observableValue, oldPackagePath, newPackagePath) -> {
             textureList.getSelectionModel().clearSelection();
             textureList.getItems().clear();
@@ -542,6 +546,205 @@ public class Controller implements Initializable {
             show(Alert.AlertType.INFORMATION, "Success", null, "Texture " + texture.toString() + " successfully replaced.");
         } catch (Exception e) {
             showError(e);
+        }
+    }
+
+    @FXML
+    private void exportAllTextures() {
+        if (utxPathProperty.get() == null || utxPathProperty.get().isEmpty()) {
+            show(Alert.AlertType.WARNING, "Error", null, "Por favor selecciona un archivo UTX primero.");
+            return;
+        }
+
+        try {
+            File utxFile = new File(utxPathProperty.get());
+            // Crear la carpeta output en el directorio del proyecto (directorio de trabajo actual)
+            File outputDir = new File("output");
+            
+            if (!outputDir.exists()) {
+                if (!outputDir.mkdirs()) {
+                    show(Alert.AlertType.ERROR, "Error", null, "No se pudo crear la carpeta 'output'.");
+                    return;
+                }
+            }
+
+            progress.setProgress(-1);
+            progress.setVisible(true);
+            
+            ForkJoinPool.commonPool().execute(() -> {
+                int exported = 0;
+                int errors = 0;
+                
+                try (UnrealPackage up = new UnrealPackage(utxFile, true)) {
+                    for (UnrealPackage.ExportEntry entry : up.getExportTable()) {
+                        if (entry.getObjectClass() == null) {
+                            continue;
+                        }
+                        
+                        String objectClass = entry.getObjectClass().getObjectFullName();
+                        BufferedImage image = null;
+                        String textureName = fixPath(entry.getObjectFullName());
+                        
+                        try {
+                            // Procesar texturas tipo Engine.Texture
+                            if (ConvertTool.isTexture(objectClass)) {
+                                MipMapInfo info = MipMapInfo.getInfo(entry);
+                                if (!SUPPORTED_FORMATS.contains(info.format)) {
+                                    continue;
+                                }
+                                
+                                byte[] raw = entry.getObjectRawData();
+                                
+                                // Convertir la textura a BufferedImage y exportar como PNG
+                                switch (info.format) {
+                                    case DXT1:
+                                    case DXT3:
+                                    case DXT5:
+                                        Img dds = DDS.createFromData(raw, info);
+                                        image = dds.getMipMaps()[0];
+                                        break;
+                                    case RGBA8:
+                                        Img tga = TGA.createFromData(raw, info);
+                                        image = tga.getMipMaps()[0];
+                                        break;
+                                    case P8:
+                                        Img p8 = P8.createFromData(raw, info);
+                                        image = p8.getMipMaps()[0];
+                                        break;
+                                    case G16:
+                                        Img g16 = G16.createFromData(raw, info);
+                                        image = g16.getMipMaps()[0];
+                                        break;
+                                    default:
+                                        // Formato no soportado, continuar
+                                        continue;
+                                }
+                            }
+                            // Procesar texturas tipo Engine.GFxFlash
+                            else if ("Engine.GFxFlash".equals(objectClass)) {
+                                byte[] raw = entry.getObjectRawData();
+                                ByteBuffer data = ByteBuffer.wrap(raw);
+                                
+                                new TextureProperties().read(up, data);
+                                
+                                String ext = up.nameReference(getCompactInt(data)).toLowerCase();
+                                switch (ext) {
+                                    case "tga": {
+                                        int dataLength = getCompactInt(data);
+                                        
+                                        // initial header fields
+                                        int idLength = data.get() & 0xff;
+                                        int colorMapType = data.get() & 0xff;
+                                        int imageType = data.get() & 0xff;
+                                        
+                                        // color map header fields
+                                        int firstEntryIndex = data.getShort() & 0xffff;
+                                        int colorMapLength = data.getShort() & 0xffff;
+                                        byte colorMapEntrySize = data.get();
+                                        
+                                        // TGA image specification fields
+                                        int xOrigin = data.getShort() & 0xffff;
+                                        int yOrigin = data.getShort() & 0xffff;
+                                        int width = data.getShort() & 0xffff;
+                                        int height = data.getShort() & 0xffff;
+                                        byte pixelDepth = data.get();
+                                        byte imageDescriptor = data.get();
+                                        
+                                        MipMapInfo info = new MipMapInfo();
+                                        info.exportIndex = entry.getIndex();
+                                        info.name = entry.getObjectFullName();
+                                        info.format = Img.Format.RGBA8;
+                                        info.width = width;
+                                        info.height = height;
+                                        info.offsets = new int[]{data.position()};
+                                        info.sizes = new int[]{raw.length - data.position()};
+                                        
+                                        if (info.offsets.length > 0) {
+                                            Img tga = TGA.createFromData(raw, info);
+                                            image = tga.getMipMaps()[0];
+                                        }
+                                        break;
+                                    }
+                                    case "dds": {
+                                        byte[] dds = new byte[getCompactInt(data)];
+                                        int dataOffset = data.position();
+                                        data.get(dds);
+                                        ByteBuffer buffer = ByteBuffer.wrap(dds);
+                                        DDSImage ddsImage = DDSImage.read(buffer);
+                                        
+                                        MipMapInfo info = new MipMapInfo();
+                                        info.exportIndex = entry.getIndex();
+                                        info.name = entry.getObjectFullName();
+                                        info.format = DDS.getFormat(ddsImage.getCompressionFormat());
+                                        info.width = ddsImage.getWidth();
+                                        info.height = ddsImage.getHeight();
+                                        DDSImage.ImageInfo[] infos = ddsImage.getAllMipMaps();
+                                        info.offsets = new int[infos.length];
+                                        info.sizes = new int[infos.length];
+                                        info.offsets[0] = 128 + dataOffset;
+                                        info.sizes[0] = infos[0].getData().limit();
+                                        for (int i = 1; i < infos.length; i++) {
+                                            info.offsets[i] = info.offsets[i - 1] + info.sizes[i - 1];
+                                            info.sizes[i] = infos[i].getData().limit();
+                                        }
+                                        
+                                        byte[] fullRaw = entry.getObjectRawData();
+                                        Img ddsImg = DDS.createFromData(fullRaw, info);
+                                        image = ddsImg.getMipMaps()[0];
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (image != null) {
+                                File outputFile = new File(outputDir, textureName + ".png");
+                                createParentDirectories(outputFile);
+                                ImageIO.write(image, "png", outputFile);
+                                exported++;
+                            }
+                        } catch (Exception e) {
+                            errors++;
+                            e.printStackTrace();
+                        }
+                    }
+                    
+                    final int finalExported = exported;
+                    final int finalErrors = errors;
+                    Platform.runLater(() -> {
+                        progress.setVisible(false);
+                        String message = "Exportación completada.\nTexturas exportadas: " + finalExported;
+                        if (finalErrors > 0) {
+                            message += "\nErrores: " + finalErrors;
+                        }
+                        message += "\nCarpeta: " + outputDir.getAbsolutePath();
+                        show(Alert.AlertType.INFORMATION, "Éxito", null, message);
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        progress.setVisible(false);
+                        showError(e);
+                    });
+                }
+            });
+        } catch (Exception e) {
+            progress.setVisible(false);
+            showError(e);
+        }
+    }
+
+    private static String fixPath(String path) {
+        while (path.indexOf('.') != -1) {
+            path = path.replace(".", File.separator);
+        }
+        return path;
+    }
+
+    private static void createParentDirectories(File file) throws IOException {
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            if (!parent.mkdirs()) {
+                throw new IOException("No se pudo crear el directorio: " + parent.getAbsolutePath());
+            }
         }
     }
 

@@ -24,8 +24,14 @@ Requirements
 ------------
 Java 17 or later is required.
 
+## Features
+- View textures from Lineage 2 UTX files
+- Replace individual textures
+- **Export all textures as PNG images** - Batch export all textures from a UTX file to PNG format in the `output` folder
+
 ## Updates by ak4n1
 - Updated to Java 17 compatibility
 - Updated Gradle wrapper to version 7.6
 - Added JavaFX 17.0.2 support with automatic extraction
 - Created run.bat script for easy execution
+- Added batch export functionality: Export all textures from UTX files as PNG images to the `output` folder

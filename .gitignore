@@ -12,3 +12,6 @@ build/
 
 # JavaFX SDK (keep the zip file, ignore the extracted folder)
 javafx/javafx-sdk-17.0.2/
+
+# Output folder for exported textures
+output/

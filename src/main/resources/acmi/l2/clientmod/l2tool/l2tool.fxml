@@ -42,7 +42,12 @@
                 GridPane.rowIndex="3"/>
         <Button fx:id="view" mnemonicParsing="false" onAction="#showTexture" text="view" GridPane.columnIndex="1"
                 GridPane.rowIndex="3"/>
+        <Button fx:id="exportAll" maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                minWidth="-Infinity" mnemonicParsing="false" onAction="#exportAllTextures" text="export all"
+                GridPane.columnIndex="0" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
+                GridPane.rowIndex="4"/>
         <rowConstraints>
+            <RowConstraints/>
             <RowConstraints/>
             <RowConstraints/>
             <RowConstraints/>
