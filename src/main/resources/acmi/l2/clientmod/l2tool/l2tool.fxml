@@ -4,7 +4,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<AnchorPane id="AnchorPane" prefWidth="350.0" xmlns="http://javafx.com/javafx/8.0.40"
+<AnchorPane id="AnchorPane" prefWidth="350.0" prefHeight="250.0" xmlns="http://javafx.com/javafx/8.0.40"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="acmi.l2.clientmod.l2tool.Controller">
     <GridPane alignment="CENTER" hgap="2.0" vgap="2.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
               AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
@@ -42,11 +42,16 @@
                 GridPane.rowIndex="3"/>
         <Button fx:id="view" mnemonicParsing="false" onAction="#showTexture" text="view" GridPane.columnIndex="1"
                 GridPane.rowIndex="3"/>
+        <CheckBox fx:id="keepStructure" selected="true" text="Keep folder structure" GridPane.columnIndex="0"
+                  GridPane.columnSpan="2" GridPane.rowIndex="4"/>
+        <CheckBox fx:id="clearOutput" selected="false" text="Clear output before export" GridPane.columnIndex="0"
+                  GridPane.columnSpan="2" GridPane.rowIndex="5"/>
         <Button fx:id="exportAll" maxWidth="1.7976931348623157E308" minHeight="-Infinity"
                 minWidth="-Infinity" mnemonicParsing="false" onAction="#exportAllTextures" text="export all"
-                GridPane.columnIndex="0" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
-                GridPane.rowIndex="4"/>
+                GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
+                GridPane.rowIndex="5"/>
         <rowConstraints>
+            <RowConstraints/>
             <RowConstraints/>
             <RowConstraints/>
             <RowConstraints/>

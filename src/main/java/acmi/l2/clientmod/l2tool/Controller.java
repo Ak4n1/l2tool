@@ -99,6 +99,10 @@ public class Controller implements Initializable {
     private Button view;
     @FXML
     private Button exportAll;
+    @FXML
+    private CheckBox keepStructure;
+    @FXML
+    private CheckBox clearOutput;
 
     @FXML
     private ProgressIndicator progress;
@@ -552,7 +556,7 @@ public class Controller implements Initializable {
     @FXML
     private void exportAllTextures() {
         if (utxPathProperty.get() == null || utxPathProperty.get().isEmpty()) {
-            show(Alert.AlertType.WARNING, "Error", null, "Por favor selecciona un archivo UTX primero.");
+            show(Alert.AlertType.WARNING, "Error", null, "Please select a UTX file first.");
             return;
         }
 
@@ -561,9 +565,19 @@ public class Controller implements Initializable {
             // Crear la carpeta output en el directorio del proyecto (directorio de trabajo actual)
             File outputDir = new File("output");
             
+            // Borrar el contenido de output si el checkbox está marcado
+            if (clearOutput.isSelected() && outputDir.exists()) {
+                try {
+                    deleteDirectoryContents(outputDir);
+                } catch (IOException e) {
+                    show(Alert.AlertType.ERROR, "Error", null, "Could not clear output folder: " + e.getMessage());
+                    return;
+                }
+            }
+            
             if (!outputDir.exists()) {
                 if (!outputDir.mkdirs()) {
-                    show(Alert.AlertType.ERROR, "Error", null, "No se pudo crear la carpeta 'output'.");
+                    show(Alert.AlertType.ERROR, "Error", null, "Could not create the 'output' folder.");
                     return;
                 }
             }
@@ -583,7 +597,18 @@ public class Controller implements Initializable {
                         
                         String objectClass = entry.getObjectClass().getObjectFullName();
                         BufferedImage image = null;
-                        String textureName = fixPath(entry.getObjectFullName());
+                        
+                        // Determinar el nombre del archivo según el checkbox
+                        String textureName;
+                        if (keepStructure.isSelected()) {
+                            // Con estructura de carpetas (comportamiento original)
+                            textureName = fixPath(entry.getObjectFullName());
+                        } else {
+                            // Sin estructura: solo el nombre final
+                            String fullName = entry.getObjectFullName();
+                            int lastDot = fullName.lastIndexOf('.');
+                            textureName = lastDot >= 0 ? fullName.substring(lastDot + 1) : fullName;
+                        }
                         
                         try {
                             // Procesar texturas tipo Engine.Texture
@@ -712,12 +737,12 @@ public class Controller implements Initializable {
                     final int finalErrors = errors;
                     Platform.runLater(() -> {
                         progress.setVisible(false);
-                        String message = "Exportación completada.\nTexturas exportadas: " + finalExported;
+                        String message = "Export completed.\nTextures exported: " + finalExported;
                         if (finalErrors > 0) {
-                            message += "\nErrores: " + finalErrors;
+                            message += "\nErrors: " + finalErrors;
                         }
-                        message += "\nCarpeta: " + outputDir.getAbsolutePath();
-                        show(Alert.AlertType.INFORMATION, "Éxito", null, message);
+                        message += "\nFolder: " + outputDir.getAbsolutePath();
+                        show(Alert.AlertType.INFORMATION, "Success", null, message);
                     });
                 } catch (Exception e) {
                     Platform.runLater(() -> {
@@ -743,7 +768,26 @@ public class Controller implements Initializable {
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
             if (!parent.mkdirs()) {
-                throw new IOException("No se pudo crear el directorio: " + parent.getAbsolutePath());
+                throw new IOException("Could not create directory: " + parent.getAbsolutePath());
+            }
+        }
+    }
+
+    private static void deleteDirectoryContents(File directory) throws IOException {
+        if (!directory.exists() || !directory.isDirectory()) {
+            return;
+        }
+        
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectoryContents(file);
+                }
+                if (!file.delete()) {
+                    // Si no se puede borrar, continuar con los demás
+                    // No lanzamos excepción para que no se detenga el proceso
+                }
             }
         }
     }
