@@ -3,7 +3,7 @@ L2Tool
 Lineage 2 texture viewer/replacer.
 
 <div align="center">
-  <img src="images/screenshot.png" alt="L2Tool Screenshot">
+  <img src="images/image.png" alt="L2Tool Screenshot">
 </div>
 
 Run
