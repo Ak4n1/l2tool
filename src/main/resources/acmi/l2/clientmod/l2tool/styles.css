@@ -1,0 +1,51 @@
+.combo-box {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #404040;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e0e0e0;
+}
+
+.combo-box .list-view {
+    -fx-background-color: #2d2d2d;
+}
+
+.combo-box .list-cell:hover {
+    -fx-background-color: #404040;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #e0e0e0;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #2d2d2d;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e0e0e0;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #404040;
+}
+
+.combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: #505050;
+    -fx-text-fill: #e0e0e0;
+}
+
+.root {
+    -fx-background-color: #181818;
+}
+

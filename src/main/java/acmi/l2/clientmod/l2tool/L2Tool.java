@@ -31,6 +31,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.util.prefs.Preferences;
 
@@ -51,9 +52,13 @@ public class L2Tool extends Application {
         Controller controller = loader.getController();
         controller.setApplication(this);
 
+        Scene scene = new Scene(parent);
+        scene.getStylesheets().add(L2Tool.class.getResource("styles.css").toExternalForm());
+        
         stage.setTitle("L2Tool");
         stage.getIcons().add(new Image(L2Tool.class.getResourceAsStream("L2Tool.png")));
-        stage.setScene(new Scene(parent));
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.setScene(scene);
         stage.show();
         Platform.runLater(() -> {
             stage.setWidth(Double.parseDouble(windowPrefs().get("width", String.valueOf(stage.getWidth()))));

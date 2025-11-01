@@ -43,6 +43,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -103,9 +105,30 @@ public class Controller implements Initializable {
     private CheckBox keepStructure;
     @FXML
     private CheckBox clearOutput;
+    @FXML
+    private RadioButton formatPNG;
+    @FXML
+    private RadioButton formatJPEG;
+    @FXML
+    private RadioButton formatBMP;
+    @FXML
+    private RadioButton formatGIF;
+    @FXML
+    private RadioButton formatWEBP;
+    @FXML
+    private RadioButton formatDDS;
+    private ToggleGroup formatGroup;
 
     @FXML
     private ProgressIndicator progress;
+    @FXML
+    private HBox titleBar;
+    @FXML
+    private Button minimizeBtn;
+    @FXML
+    private Button maximizeBtn;
+    @FXML
+    private Button closeBtn;
 
     private static final Set<Img.Format> SUPPORTED_FORMATS = new HashSet<Img.Format>() {{
         add(Img.Format.RGBA8);
@@ -120,8 +143,66 @@ public class Controller implements Initializable {
     private TextureView textureViewController;
     private Future loadImageTaskFuture;
 
+    private double xOffset = 0;
+    private double yOffset = 0;
+    
     public void setApplication(L2Tool application) {
         this.application = application;
+        
+        if (titleBar != null) {
+            titleBar.setOnMousePressed(event -> {
+                xOffset = event.getSceneX();
+                yOffset = event.getSceneY();
+            });
+            
+            titleBar.setOnMouseDragged(event -> {
+                application.getStage().setX(event.getScreenX() - xOffset);
+                application.getStage().setY(event.getScreenY() - yOffset);
+            });
+            
+            if (minimizeBtn != null) {
+                minimizeBtn.setOnMouseEntered(e -> minimizeBtn.setStyle("-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+                minimizeBtn.setOnMouseExited(e -> minimizeBtn.setStyle("-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+            }
+            
+            if (maximizeBtn != null) {
+                maximizeBtn.setOnMouseEntered(e -> maximizeBtn.setStyle("-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+                maximizeBtn.setOnMouseExited(e -> maximizeBtn.setStyle("-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+            }
+            
+            if (closeBtn != null) {
+                closeBtn.setOnMouseEntered(e -> closeBtn.setStyle("-fx-background-color: #c42b1c; -fx-text-fill: #ffffff; -fx-border-color: transparent; -fx-cursor: hand;"));
+                closeBtn.setOnMouseExited(e -> closeBtn.setStyle("-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+            }
+        }
+    }
+    
+    @FXML
+    private void minimizeWindow() {
+        if (application != null) {
+            application.getStage().setIconified(true);
+        }
+    }
+    
+    @FXML
+    private void maximizeWindow() {
+        if (application != null) {
+            Stage stage = application.getStage();
+            if (stage.isMaximized()) {
+                stage.setMaximized(false);
+                maximizeBtn.setText("□");
+            } else {
+                stage.setMaximized(true);
+                maximizeBtn.setText("❐");
+            }
+        }
+    }
+    
+    @FXML
+    private void closeWindow() {
+        if (application != null) {
+            application.getStage().close();
+        }
     }
 
     @Override
@@ -138,6 +219,23 @@ public class Controller implements Initializable {
         view.disableProperty().bind(textureNotSelected);
         set.disableProperty().bind(imgProperty.isNull().or(textureInfoProperty.isNull()));
         exportAll.disableProperty().bind(utxPathProperty.isNull());
+        
+        formatGroup = new ToggleGroup();
+        formatPNG.setToggleGroup(formatGroup);
+        formatJPEG.setToggleGroup(formatGroup);
+        formatBMP.setToggleGroup(formatGroup);
+        formatGIF.setToggleGroup(formatGroup);
+        formatWEBP.setToggleGroup(formatGroup);
+        formatDDS.setToggleGroup(formatGroup);
+        formatPNG.setSelected(true);
+        
+        try {
+            Class.forName("io.github.gotson.webp.WebPImageWriterSpi");
+        } catch (ClassNotFoundException e) {
+            formatWEBP.setDisable(true);
+            formatWEBP.setTooltip(new Tooltip("WebP support requires webp-imageio library"));
+        }
+        
         utxPathProperty.addListener((observableValue, oldPackagePath, newPackagePath) -> {
             textureList.getSelectionModel().clearSelection();
             textureList.getItems().clear();
@@ -562,10 +660,8 @@ public class Controller implements Initializable {
 
         try {
             File utxFile = new File(utxPathProperty.get());
-            // Crear la carpeta output en el directorio del proyecto (directorio de trabajo actual)
             File outputDir = new File("output");
             
-            // Borrar el contenido de output si el checkbox está marcado
             if (clearOutput.isSelected() && outputDir.exists()) {
                 try {
                     deleteDirectoryContents(outputDir);
@@ -597,14 +693,13 @@ public class Controller implements Initializable {
                         
                         String objectClass = entry.getObjectClass().getObjectFullName();
                         BufferedImage image = null;
+                        Img imgObject = null;
+                        MipMapInfo info = null;
                         
-                        // Determinar el nombre del archivo según el checkbox
                         String textureName;
                         if (keepStructure.isSelected()) {
-                            // Con estructura de carpetas (comportamiento original)
                             textureName = fixPath(entry.getObjectFullName());
                         } else {
-                            // Sin estructura: solo el nombre final
                             String fullName = entry.getObjectFullName();
                             int lastDot = fullName.lastIndexOf('.');
                             textureName = lastDot >= 0 ? fullName.substring(lastDot + 1) : fullName;
@@ -613,35 +708,33 @@ public class Controller implements Initializable {
                         try {
                             // Procesar texturas tipo Engine.Texture
                             if (ConvertTool.isTexture(objectClass)) {
-                                MipMapInfo info = MipMapInfo.getInfo(entry);
+                                info = MipMapInfo.getInfo(entry);
                                 if (!SUPPORTED_FORMATS.contains(info.format)) {
                                     continue;
                                 }
                                 
                                 byte[] raw = entry.getObjectRawData();
                                 
-                                // Convertir la textura a BufferedImage y exportar como PNG
                                 switch (info.format) {
                                     case DXT1:
                                     case DXT3:
                                     case DXT5:
-                                        Img dds = DDS.createFromData(raw, info);
-                                        image = dds.getMipMaps()[0];
+                                        imgObject = DDS.createFromData(raw, info);
+                                        image = imgObject.getMipMaps()[0];
                                         break;
                                     case RGBA8:
-                                        Img tga = TGA.createFromData(raw, info);
-                                        image = tga.getMipMaps()[0];
+                                        imgObject = TGA.createFromData(raw, info);
+                                        image = imgObject.getMipMaps()[0];
                                         break;
                                     case P8:
-                                        Img p8 = P8.createFromData(raw, info);
-                                        image = p8.getMipMaps()[0];
+                                        imgObject = P8.createFromData(raw, info);
+                                        image = imgObject.getMipMaps()[0];
                                         break;
                                     case G16:
-                                        Img g16 = G16.createFromData(raw, info);
-                                        image = g16.getMipMaps()[0];
+                                        imgObject = G16.createFromData(raw, info);
+                                        image = imgObject.getMipMaps()[0];
                                         break;
                                     default:
-                                        // Formato no soportado, continuar
                                         continue;
                                 }
                             }
@@ -657,17 +750,14 @@ public class Controller implements Initializable {
                                     case "tga": {
                                         int dataLength = getCompactInt(data);
                                         
-                                        // initial header fields
                                         int idLength = data.get() & 0xff;
                                         int colorMapType = data.get() & 0xff;
                                         int imageType = data.get() & 0xff;
                                         
-                                        // color map header fields
                                         int firstEntryIndex = data.getShort() & 0xffff;
                                         int colorMapLength = data.getShort() & 0xffff;
                                         byte colorMapEntrySize = data.get();
                                         
-                                        // TGA image specification fields
                                         int xOrigin = data.getShort() & 0xffff;
                                         int yOrigin = data.getShort() & 0xffff;
                                         int width = data.getShort() & 0xffff;
@@ -675,7 +765,7 @@ public class Controller implements Initializable {
                                         byte pixelDepth = data.get();
                                         byte imageDescriptor = data.get();
                                         
-                                        MipMapInfo info = new MipMapInfo();
+                                        info = new MipMapInfo();
                                         info.exportIndex = entry.getIndex();
                                         info.name = entry.getObjectFullName();
                                         info.format = Img.Format.RGBA8;
@@ -685,8 +775,8 @@ public class Controller implements Initializable {
                                         info.sizes = new int[]{raw.length - data.position()};
                                         
                                         if (info.offsets.length > 0) {
-                                            Img tga = TGA.createFromData(raw, info);
-                                            image = tga.getMipMaps()[0];
+                                            imgObject = TGA.createFromData(raw, info);
+                                            image = imgObject.getMipMaps()[0];
                                         }
                                         break;
                                     }
@@ -697,7 +787,7 @@ public class Controller implements Initializable {
                                         ByteBuffer buffer = ByteBuffer.wrap(dds);
                                         DDSImage ddsImage = DDSImage.read(buffer);
                                         
-                                        MipMapInfo info = new MipMapInfo();
+                                        info = new MipMapInfo();
                                         info.exportIndex = entry.getIndex();
                                         info.name = entry.getObjectFullName();
                                         info.format = DDS.getFormat(ddsImage.getCompressionFormat());
@@ -714,18 +804,69 @@ public class Controller implements Initializable {
                                         }
                                         
                                         byte[] fullRaw = entry.getObjectRawData();
-                                        Img ddsImg = DDS.createFromData(fullRaw, info);
-                                        image = ddsImg.getMipMaps()[0];
+                                        imgObject = DDS.createFromData(fullRaw, info);
+                                        image = imgObject.getMipMaps()[0];
                                         break;
                                     }
                                 }
                             }
                             
-                            if (image != null) {
-                                File outputFile = new File(outputDir, textureName + ".png");
-                                createParentDirectories(outputFile);
-                                ImageIO.write(image, "png", outputFile);
-                                exported++;
+                            if (image != null && imgObject != null && info != null) {
+                                File outputFile;
+                                
+                                // Exportar como DDS si está seleccionado y la textura es DXT
+                                if (formatDDS.isSelected() && 
+                                    (info.format == Img.Format.DXT1 || 
+                                     info.format == Img.Format.DXT3 || 
+                                     info.format == Img.Format.DXT5) &&
+                                    imgObject instanceof DDS) {
+                                    outputFile = new File(outputDir, textureName + ".dds");
+                                    createParentDirectories(outputFile);
+                                    ((DDS) imgObject).write(outputFile);
+                                    exported++;
+                                } else {
+                                    // Exportar usando ImageIO para otros formatos
+                                    String format = "png";
+                                    String extension = ".png";
+                                    if (formatJPEG.isSelected()) {
+                                        format = "jpg";
+                                        extension = ".jpg";
+                                    } else if (formatBMP.isSelected()) {
+                                        format = "bmp";
+                                        extension = ".bmp";
+                                    } else if (formatGIF.isSelected()) {
+                                        format = "gif";
+                                        extension = ".gif";
+                                    } else if (formatWEBP.isSelected()) {
+                                        format = "webp";
+                                        extension = ".webp";
+                                    }
+                                    
+                                    outputFile = new File(outputDir, textureName + extension);
+                                    createParentDirectories(outputFile);
+                                    
+                                    // Convertir BufferedImage a formato compatible con ImageIO
+                                    BufferedImage writeImage = image;
+                                    if (format.equals("jpg")) {
+                                        // JPEG no soporta transparencia, convertir a RGB
+                                        if (writeImage.getType() != BufferedImage.TYPE_INT_RGB) {
+                                            BufferedImage rgbImage = new BufferedImage(writeImage.getWidth(), writeImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+                                            rgbImage.getGraphics().drawImage(image, 0, 0, null);
+                                            writeImage = rgbImage;
+                                        }
+                                    } else if (format.equals("bmp")) {
+                                        // Asegurar tipo estándar para BMP
+                                        if (writeImage.getType() != BufferedImage.TYPE_INT_RGB && 
+                                            writeImage.getType() != BufferedImage.TYPE_INT_ARGB) {
+                                            BufferedImage newImage = new BufferedImage(writeImage.getWidth(), writeImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                                            newImage.getGraphics().drawImage(writeImage, 0, 0, null);
+                                            writeImage = newImage;
+                                        }
+                                    }
+                                    
+                                    ImageIO.write(writeImage, format, outputFile);
+                                    exported++;
+                                }
                             }
                         } catch (Exception e) {
                             errors++;
@@ -785,8 +926,7 @@ public class Controller implements Initializable {
                     deleteDirectoryContents(file);
                 }
                 if (!file.delete()) {
-                    // Si no se puede borrar, continuar con los demás
-                    // No lanzamos excepción para que no se detenga el proceso
+                    // Continue with next file
                 }
             }
         }
