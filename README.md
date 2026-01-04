@@ -39,20 +39,15 @@ Requirements
 ------------
 Java 17 or later is required.
 
-## Features
-- View textures from Lineage 2 UTX files
-- Replace individual textures
-- **Export all textures as PNG images** - Batch export all textures from a UTX file to PNG format in the `output` folder
-  - **Keep folder structure** checkbox: Maintains the original folder structure from the UTX file (enabled by default)
-  - **Clear output before export** checkbox: Clears the `output` folder contents before exporting new textures
-
-## Updates by ak4n1
-- Updated to Java 17 compatibility
-- Updated Gradle wrapper to version 7.6
-- Added JavaFX 17.0.2 support with automatic extraction
-- Created run.bat script for easy execution
-- Added batch export functionality: Export all textures from UTX files as PNG images to the `output` folder
-- Added build scripts: `build-w.bat` for Windows and `build-l.sh` for Linux/macOS
-- Added export options:
-  - **Keep folder structure**: Maintains original folder structure when exporting
-  - **Clear output before export**: Clears output folder before each export
+## Features & Updates by ak4n1
+- **Modern Platform Support**: Updated to Java 17 compatibility, Gradle 7.6, and JavaFX 17.0.2 support with automaticExtraction.
+- **Deployment Scripts**: Added `run.bat` for easy execution, plus `build-w.bat` (Windows) and `build-l.sh` (Linux/macOS) for simplified building.
+- **Texture Viewing**: Enhanced viewer for Lineage 2 UTX files with support for multiple formats (DXT, RGBA8, P8, G16, etc.).
+- **Premium Custom UI**: Fully redesigned dark-themed dialogs with technical details (Format, Dimensions, MipMap count, Export Index).
+- **Enhanced Exporting**:
+  - **Individual Export**: Save selected textures instantly to `output_selected/`.
+  - **Batch Export**: Export entire packages to `output_all/`.
+  - **Format Support**: Choose between PNG, JPEG, BMP, WEBP, and DDS (for DXT textures).
+  - **Export Toggles**: "Keep folder structure" to maintain package hierarchy and "Clear output folder" to keep your workspace clean.
+- **Selection Persistence**: Fixed UI bugs to ensure the selected texture remains visible and active during interaction.
+- **Texture Replacement**: Easy replacement of individual textures within UTX packages.

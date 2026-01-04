@@ -3,12 +3,3 @@ LOG: Button injection check: view=true, info=true
 LOG: AutoCompleteComboBox initialized.
 LOG: Binding eval: NULL
 LOG: Button listeners manually attached.
-LOG: Package path changed to: D:\Clients\terra_dev\SysTextures\L2UI_EPIC.utx
-LOG: Starting to load package contents...
-LOG: Sorting 1734 textures...
-LOG: Texture list updated and sorted.
-LOG: Progress hidden.
-LOG: exportTexture CLICKED
-LOG: showTexture CLICKED
-LOG: showTexture FAILED - info is null
-LOG: showTextureInfo CLICKED (Unified UI)
