@@ -74,12 +74,14 @@ public class Controller implements Initializable {
 
     private L2Tool application;
 
-    private final StringProperty imgInitialDirectory = new SimpleStringProperty(L2Tool.getPrefs().get(KEY_IMAGE_INITIAL_DIRECTORY, null));
+    private final StringProperty imgInitialDirectory = new SimpleStringProperty(
+            L2Tool.getPrefs().get(KEY_IMAGE_INITIAL_DIRECTORY, null));
     @FXML
     private TextField imgPath;
     private final ObjectProperty<Img> imgProperty = new SimpleObjectProperty<>();
 
-    private final StringProperty utxInitialDirectory = new SimpleStringProperty(L2Tool.getPrefs().get(KEY_UTX_INITIAL_DIRECTORY, null));
+    private final StringProperty utxInitialDirectory = new SimpleStringProperty(
+            L2Tool.getPrefs().get(KEY_UTX_INITIAL_DIRECTORY, null));
     private final StringProperty utxPathProperty = new SimpleStringProperty();
     @FXML
     private TextField utxPath;
@@ -95,8 +97,10 @@ public class Controller implements Initializable {
     private final ObjectProperty<MipMapInfo> textureInfoProperty = new SimpleObjectProperty<>();
     @FXML
     private Button export;
-    private final StringProperty exportInitialDirectory = new SimpleStringProperty(L2Tool.getPrefs().get(KEY_EXPORT_INITIAL_DIRECTORY, null));
-    private final StringProperty uedInitialDirectory = new SimpleStringProperty(L2Tool.getPrefs().get(KEY_UED_INITIAL_DIRECTORY, null));
+    private final StringProperty exportInitialDirectory = new SimpleStringProperty(
+            L2Tool.getPrefs().get(KEY_EXPORT_INITIAL_DIRECTORY, null));
+    private final StringProperty uedInitialDirectory = new SimpleStringProperty(
+            L2Tool.getPrefs().get(KEY_UED_INITIAL_DIRECTORY, null));
     @FXML
     private Button view;
     @FXML
@@ -130,14 +134,22 @@ public class Controller implements Initializable {
     @FXML
     private Button closeBtn;
 
-    private static final Set<Img.Format> SUPPORTED_FORMATS = new HashSet<Img.Format>() {{
-        add(Img.Format.RGBA8);
-        add(Img.Format.DXT1);
-        add(Img.Format.DXT3);
-        add(Img.Format.DXT5);
-        add(Img.Format.G16);
-        add(Img.Format.P8);
-    }};
+    private static final Set<Img.Format> SUPPORTED_FORMATS = new HashSet<Img.Format>() {
+        {
+            add(Img.Format.RGBA8);
+            add(Img.Format.DXT1);
+            add(Img.Format.DXT3);
+            add(Img.Format.DXT5);
+            add(Img.Format.G16);
+            add(Img.Format.P8);
+            // Nuevos formatos soportados
+            add(Img.Format.RGB8);
+            add(Img.Format.L8);
+            add(Img.Format.RGBA7);
+            add(Img.Format.RGB16);
+            add(Img.Format.RRRGGGBBB);
+        }
+    };
 
     private Stage textureViewWindow;
     private TextureView textureViewController;
@@ -145,45 +157,51 @@ public class Controller implements Initializable {
 
     private double xOffset = 0;
     private double yOffset = 0;
-    
+
     public void setApplication(L2Tool application) {
         this.application = application;
-        
+
         if (titleBar != null) {
             titleBar.setOnMousePressed(event -> {
                 xOffset = event.getSceneX();
                 yOffset = event.getSceneY();
             });
-            
+
             titleBar.setOnMouseDragged(event -> {
                 application.getStage().setX(event.getScreenX() - xOffset);
                 application.getStage().setY(event.getScreenY() - yOffset);
             });
-            
+
             if (minimizeBtn != null) {
-                minimizeBtn.setOnMouseEntered(e -> minimizeBtn.setStyle("-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
-                minimizeBtn.setOnMouseExited(e -> minimizeBtn.setStyle("-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+                minimizeBtn.setOnMouseEntered(e -> minimizeBtn.setStyle(
+                        "-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+                minimizeBtn.setOnMouseExited(e -> minimizeBtn.setStyle(
+                        "-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
             }
-            
+
             if (maximizeBtn != null) {
-                maximizeBtn.setOnMouseEntered(e -> maximizeBtn.setStyle("-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
-                maximizeBtn.setOnMouseExited(e -> maximizeBtn.setStyle("-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+                maximizeBtn.setOnMouseEntered(e -> maximizeBtn.setStyle(
+                        "-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+                maximizeBtn.setOnMouseExited(e -> maximizeBtn.setStyle(
+                        "-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
             }
-            
+
             if (closeBtn != null) {
-                closeBtn.setOnMouseEntered(e -> closeBtn.setStyle("-fx-background-color: #c42b1c; -fx-text-fill: #ffffff; -fx-border-color: transparent; -fx-cursor: hand;"));
-                closeBtn.setOnMouseExited(e -> closeBtn.setStyle("-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
+                closeBtn.setOnMouseEntered(e -> closeBtn.setStyle(
+                        "-fx-background-color: #c42b1c; -fx-text-fill: #ffffff; -fx-border-color: transparent; -fx-cursor: hand;"));
+                closeBtn.setOnMouseExited(e -> closeBtn.setStyle(
+                        "-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
             }
         }
     }
-    
+
     @FXML
     private void minimizeWindow() {
         if (application != null) {
             application.getStage().setIconified(true);
         }
     }
-    
+
     @FXML
     private void maximizeWindow() {
         if (application != null) {
@@ -197,7 +215,7 @@ public class Controller implements Initializable {
             }
         }
     }
-    
+
     @FXML
     private void closeWindow() {
         if (application != null) {
@@ -212,14 +230,15 @@ public class Controller implements Initializable {
         utxPath.textProperty().bind(utxPathProperty);
 
         textureList.disableProperty().bind(utxPathProperty.isNull());
-        toUED.disableProperty().bind(Bindings.createBooleanBinding(() -> utxPathProperty.get() == null || utxPathProperty.get().endsWith("ugx"), utxPathProperty));
+        toUED.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> utxPathProperty.get() == null || utxPathProperty.get().endsWith("ugx"), utxPathProperty));
         BooleanBinding textureNotSelected = utxPathProperty.isNull().or(textureInfoProperty.isNull());
         export.disableProperty().bind(textureNotSelected);
         textureInfo.disableProperty().bind(textureNotSelected);
         view.disableProperty().bind(textureNotSelected);
         set.disableProperty().bind(imgProperty.isNull().or(textureInfoProperty.isNull()));
         exportAll.disableProperty().bind(utxPathProperty.isNull());
-        
+
         formatGroup = new ToggleGroup();
         formatPNG.setToggleGroup(formatGroup);
         formatJPEG.setToggleGroup(formatGroup);
@@ -228,14 +247,14 @@ public class Controller implements Initializable {
         formatWEBP.setToggleGroup(formatGroup);
         formatDDS.setToggleGroup(formatGroup);
         formatPNG.setSelected(true);
-        
+
         try {
             Class.forName("io.github.gotson.webp.WebPImageWriterSpi");
         } catch (ClassNotFoundException e) {
             formatWEBP.setDisable(true);
             formatWEBP.setTooltip(new Tooltip("WebP support requires webp-imageio library"));
         }
-        
+
         utxPathProperty.addListener((observableValue, oldPackagePath, newPackagePath) -> {
             textureList.getSelectionModel().clearSelection();
             textureList.getItems().clear();
@@ -299,8 +318,8 @@ public class Controller implements Initializable {
                                             info.format = Img.Format.RGBA8;
                                             info.width = width;
                                             info.height = height;
-                                            info.offsets = new int[]{data.position()};
-                                            info.sizes = new int[]{raw.length - data.position()};
+                                            info.offsets = new int[] { data.position() };
+                                            info.sizes = new int[] { raw.length - data.position() };
 
                                             if (info.offsets.length > 0)
                                                 Platform.runLater(() -> textureList.getItems().add(info));
@@ -336,18 +355,18 @@ public class Controller implements Initializable {
                                     break;
                                 }
                                 default:
-                                    //ignore
+                                    // ignore
                             }
 
-                        Platform.runLater(() ->
-                                progress.setProgress((double) counter.incrementAndGet() / exportSize));
+                        Platform.runLater(() -> progress.setProgress((double) counter.incrementAndGet() / exportSize));
                     }
 
                     Platform.runLater(() -> {
-                        sort(textureList.getItems(), (o1, o2) ->
-                                o1.name.toLowerCase().compareTo(o2.name.toLowerCase()));
+                        sort(textureList.getItems(),
+                                (o1, o2) -> o1.name.toLowerCase().compareTo(o2.name.toLowerCase()));
 
-                        AutoCompleteComboBox.autoCompleteComboBox(textureList, AutoCompleteComboBox.AutoCompleteMode.CONTAINING);
+                        AutoCompleteComboBox.autoCompleteComboBox(textureList,
+                                AutoCompleteComboBox.AutoCompleteMode.CONTAINING);
                     });
                 } catch (final Exception e) {
                     Platform.runLater(() -> showError(e));
@@ -357,12 +376,17 @@ public class Controller implements Initializable {
             });
         });
 
-        textureInfoProperty.bind(Bindings.createObjectBinding(() -> AutoCompleteComboBox.getSelectedItem(textureList), textureList.getSelectionModel().selectedIndexProperty()));
+        textureInfoProperty.bind(Bindings.createObjectBinding(() -> AutoCompleteComboBox.getSelectedItem(textureList),
+                textureList.getSelectionModel().selectedIndexProperty()));
 
-        imgInitialDirectory.addListener((observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_IMAGE_INITIAL_DIRECTORY, newValue));
-        utxInitialDirectory.addListener((observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_UTX_INITIAL_DIRECTORY, newValue));
-        exportInitialDirectory.addListener((observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_EXPORT_INITIAL_DIRECTORY, newValue));
-        uedInitialDirectory.addListener((observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_UED_INITIAL_DIRECTORY, newValue));
+        imgInitialDirectory.addListener(
+                (observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_IMAGE_INITIAL_DIRECTORY, newValue));
+        utxInitialDirectory.addListener(
+                (observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_UTX_INITIAL_DIRECTORY, newValue));
+        exportInitialDirectory.addListener(
+                (observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_EXPORT_INITIAL_DIRECTORY, newValue));
+        uedInitialDirectory.addListener(
+                (observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_UED_INITIAL_DIRECTORY, newValue));
     }
 
     @FXML
@@ -372,8 +396,7 @@ public class Controller implements Initializable {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("DXT", "*.dds"),
                 new FileChooser.ExtensionFilter("TGA", "*.tga"),
-                new FileChooser.ExtensionFilter("BMP", "*.bmp")
-        );
+                new FileChooser.ExtensionFilter("BMP", "*.bmp"));
         if (imgInitialDirectory.get() != null) {
             File dir = new File(imgInitialDirectory.get());
             if (dir.exists() && dir.isDirectory())
@@ -415,7 +438,8 @@ public class Controller implements Initializable {
                     throw new IOException("Unknown file format");
             }
             imgProperty.setValue(image);
-            imgPath.setText(file.getAbsolutePath() + "[" + image.getWidth() + "x" + image.getHeight() + "," + image.getFormat() + "," + image.getMipMaps().length + "]");
+            imgPath.setText(file.getAbsolutePath() + "[" + image.getWidth() + "x" + image.getHeight() + ","
+                    + image.getFormat() + "," + image.getMipMaps().length + "]");
         } catch (Exception e) {
             showError(e);
         }
@@ -483,7 +507,10 @@ public class Controller implements Initializable {
                 textureViewWindow = new Stage();
                 textureViewWindow.getIcons().add(new Image(getClass().getResourceAsStream("L2Tool.png")));
                 textureViewWindow.setScene(new Scene(pane));
-                textureViewWindow.titleProperty().bind(Bindings.createStringBinding(() -> Optional.ofNullable(textureInfoProperty.get()).map(o -> o.name).orElse(""), textureInfoProperty));
+                textureViewWindow.titleProperty()
+                        .bind(Bindings.createStringBinding(
+                                () -> Optional.ofNullable(textureInfoProperty.get()).map(o -> o.name).orElse(""),
+                                textureInfoProperty));
             } catch (IOException e) {
                 showError(e);
             }
@@ -512,6 +539,13 @@ public class Controller implements Initializable {
                     return G16.createFromData(raw, textureInfoProperty.get()).getMipMaps()[0];
                 case P8:
                     return P8.createFromData(raw, textureInfoProperty.get()).getMipMaps()[0];
+                // Nuevos formatos
+                case RGB8:
+                case L8:
+                case RGBA7:
+                case RGB16:
+                case RRRGGGBBB:
+                    return GenericTexture.createFromData(raw, textureInfoProperty.get()).getMipMaps()[0];
                 default:
                     throw new Exception("Unsupported format " + textureInfoProperty.get().format);
             }
@@ -522,7 +556,7 @@ public class Controller implements Initializable {
         LoadUtxImageTask(TextureView controller) {
             this.setOnSucceeded(event -> controller.imageProperty().setValue(this.getValue()));
             this.setOnFailed(event -> {
-                //noinspection ThrowableResultOfMethodCallIgnored
+                // noinspection ThrowableResultOfMethodCallIgnored
                 Throwable e = event.getSource().getException();
                 if (e != null) {
                     showError(e);
@@ -556,22 +590,26 @@ public class Controller implements Initializable {
                 case DXT1:
                 case DXT3:
                 case DXT5:
-                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Direct Draw Surface", "*.dds"));
+                    fileChooser.getExtensionFilters()
+                            .add(new FileChooser.ExtensionFilter("Direct Draw Surface", "*.dds"));
                     break;
                 case RGBA8:
                     fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("32-bit Targa", "*.tga"));
                     break;
                 case G16:
-                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("16-bit Grayscale BMP", "*.bmp"));
+                    fileChooser.getExtensionFilters()
+                            .add(new FileChooser.ExtensionFilter("16-bit Grayscale BMP", "*.bmp"));
                     break;
                 case P8:
-                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("8-bit Palettized BMP", "*.bmp"));
+                    fileChooser.getExtensionFilters()
+                            .add(new FileChooser.ExtensionFilter("8-bit Palettized BMP", "*.bmp"));
                     break;
             }
             File dir = new File(exportInitialDirectory.get());
             if (dir.exists() && dir.isDirectory())
                 fileChooser.setInitialDirectory(dir);
-            fileChooser.setInitialFileName(textureInfoProperty.get().name + "." + fileChooser.getExtensionFilters().get(0).getExtensions().get(0).substring(2));
+            fileChooser.setInitialFileName(textureInfoProperty.get().name + "."
+                    + fileChooser.getExtensionFilters().get(0).getExtensions().get(0).substring(2));
 
             final File file = fileChooser.showSaveDialog(application.getStage());
             if (file == null)
@@ -614,7 +652,8 @@ public class Controller implements Initializable {
 
         if (info.width != data.getWidth() || info.height != data.getHeight()) {
             show(Alert.AlertType.WARNING, "Replace failed", null,
-                    "img size:\t" + data.getWidth() + "x" + data.getHeight() + "\nutx size:\t" + info.width + "x" + info.height);
+                    "img size:\t" + data.getWidth() + "x" + data.getHeight() + "\nutx size:\t" + info.width + "x"
+                            + info.height);
             return;
         }
 
@@ -645,7 +684,8 @@ public class Controller implements Initializable {
                 info.palette = p8.palette;
                 info.palette.writeToUnrealPackage(utx);
             }
-            show(Alert.AlertType.INFORMATION, "Success", null, "Texture " + texture.toString() + " successfully replaced.");
+            show(Alert.AlertType.INFORMATION, "Success", null,
+                    "Texture " + texture.toString() + " successfully replaced.");
         } catch (Exception e) {
             showError(e);
         }
@@ -661,7 +701,7 @@ public class Controller implements Initializable {
         try {
             File utxFile = new File(utxPathProperty.get());
             File outputDir = new File("output");
-            
+
             if (clearOutput.isSelected() && outputDir.exists()) {
                 try {
                     deleteDirectoryContents(outputDir);
@@ -670,7 +710,7 @@ public class Controller implements Initializable {
                     return;
                 }
             }
-            
+
             if (!outputDir.exists()) {
                 if (!outputDir.mkdirs()) {
                     show(Alert.AlertType.ERROR, "Error", null, "Could not create the 'output' folder.");
@@ -680,22 +720,22 @@ public class Controller implements Initializable {
 
             progress.setProgress(-1);
             progress.setVisible(true);
-            
+
             ForkJoinPool.commonPool().execute(() -> {
                 int exported = 0;
                 int errors = 0;
-                
+
                 try (UnrealPackage up = new UnrealPackage(utxFile, true)) {
                     for (UnrealPackage.ExportEntry entry : up.getExportTable()) {
                         if (entry.getObjectClass() == null) {
                             continue;
                         }
-                        
+
                         String objectClass = entry.getObjectClass().getObjectFullName();
                         BufferedImage image = null;
                         Img imgObject = null;
                         MipMapInfo info = null;
-                        
+
                         String textureName;
                         if (keepStructure.isSelected()) {
                             textureName = fixPath(entry.getObjectFullName());
@@ -704,7 +744,7 @@ public class Controller implements Initializable {
                             int lastDot = fullName.lastIndexOf('.');
                             textureName = lastDot >= 0 ? fullName.substring(lastDot + 1) : fullName;
                         }
-                        
+
                         try {
                             // Procesar texturas tipo Engine.Texture
                             if (ConvertTool.isTexture(objectClass)) {
@@ -712,15 +752,16 @@ public class Controller implements Initializable {
                                 if (!SUPPORTED_FORMATS.contains(info.format)) {
                                     continue;
                                 }
-                                
+
                                 // Validar que tenga mipmaps antes de procesar
-                                if (info.sizes == null || info.sizes.length == 0 || info.offsets == null || info.offsets.length == 0) {
+                                if (info.sizes == null || info.sizes.length == 0 || info.offsets == null
+                                        || info.offsets.length == 0) {
                                     errors++;
                                     continue;
                                 }
-                                
+
                                 byte[] raw = entry.getObjectRawData();
-                                
+
                                 switch (info.format) {
                                     case DXT1:
                                     case DXT3:
@@ -746,6 +787,17 @@ public class Controller implements Initializable {
                                             image = imgObject.getMipMaps()[0];
                                         }
                                         break;
+                                    // Nuevos formatos usando GenericTexture
+                                    case RGB8:
+                                    case L8:
+                                    case RGBA7:
+                                    case RGB16:
+                                    case RRRGGGBBB:
+                                        if (info.sizes.length > 0 && info.offsets.length > 0) {
+                                            imgObject = GenericTexture.createFromData(raw, info);
+                                            image = imgObject.getMipMaps()[0];
+                                        }
+                                        break;
                                     default:
                                         continue;
                                 }
@@ -754,38 +806,38 @@ public class Controller implements Initializable {
                             else if ("Engine.GFxFlash".equals(objectClass)) {
                                 byte[] raw = entry.getObjectRawData();
                                 ByteBuffer data = ByteBuffer.wrap(raw);
-                                
+
                                 new TextureProperties().read(up, data);
-                                
+
                                 String ext = up.nameReference(getCompactInt(data)).toLowerCase();
                                 switch (ext) {
                                     case "tga": {
                                         int dataLength = getCompactInt(data);
-                                        
+
                                         int idLength = data.get() & 0xff;
                                         int colorMapType = data.get() & 0xff;
                                         int imageType = data.get() & 0xff;
-                                        
+
                                         int firstEntryIndex = data.getShort() & 0xffff;
                                         int colorMapLength = data.getShort() & 0xffff;
                                         byte colorMapEntrySize = data.get();
-                                        
+
                                         int xOrigin = data.getShort() & 0xffff;
                                         int yOrigin = data.getShort() & 0xffff;
                                         int width = data.getShort() & 0xffff;
                                         int height = data.getShort() & 0xffff;
                                         byte pixelDepth = data.get();
                                         byte imageDescriptor = data.get();
-                                        
+
                                         info = new MipMapInfo();
                                         info.exportIndex = entry.getIndex();
                                         info.name = entry.getObjectFullName();
                                         info.format = Img.Format.RGBA8;
                                         info.width = width;
                                         info.height = height;
-                                        info.offsets = new int[]{data.position()};
-                                        info.sizes = new int[]{raw.length - data.position()};
-                                        
+                                        info.offsets = new int[] { data.position() };
+                                        info.sizes = new int[] { raw.length - data.position() };
+
                                         if (info.offsets.length > 0) {
                                             imgObject = TGA.createFromData(raw, info);
                                             image = imgObject.getMipMaps()[0];
@@ -798,7 +850,7 @@ public class Controller implements Initializable {
                                         data.get(dds);
                                         ByteBuffer buffer = ByteBuffer.wrap(dds);
                                         DDSImage ddsImage = DDSImage.read(buffer);
-                                        
+
                                         info = new MipMapInfo();
                                         info.exportIndex = entry.getIndex();
                                         info.name = entry.getObjectFullName();
@@ -814,7 +866,7 @@ public class Controller implements Initializable {
                                             info.offsets[i] = info.offsets[i - 1] + info.sizes[i - 1];
                                             info.sizes[i] = infos[i].getData().limit();
                                         }
-                                        
+
                                         byte[] fullRaw = entry.getObjectRawData();
                                         imgObject = DDS.createFromData(fullRaw, info);
                                         image = imgObject.getMipMaps()[0];
@@ -822,16 +874,17 @@ public class Controller implements Initializable {
                                     }
                                 }
                             }
-                            
+
                             if (image != null && imgObject != null && info != null) {
                                 File outputFile;
-                                
+
                                 // Exportar como DDS si está seleccionado y la textura es DXT
-                                if (formatDDS.isSelected() && 
-                                    (info.format == Img.Format.DXT1 || 
-                                     info.format == Img.Format.DXT3 || 
-                                     info.format == Img.Format.DXT5) &&
-                                    imgObject instanceof DDS) {
+                                if (formatDDS.isSelected() &&
+                                        (info.format == Img.Format.DXT1 ||
+                                                info.format == Img.Format.DXT3 ||
+                                                info.format == Img.Format.DXT5)
+                                        &&
+                                        imgObject instanceof DDS) {
                                     outputFile = new File(outputDir, textureName + ".dds");
                                     createParentDirectories(outputFile);
                                     ((DDS) imgObject).write(outputFile);
@@ -853,29 +906,31 @@ public class Controller implements Initializable {
                                         format = "webp";
                                         extension = ".webp";
                                     }
-                                    
+
                                     outputFile = new File(outputDir, textureName + extension);
                                     createParentDirectories(outputFile);
-                                    
+
                                     // Convertir BufferedImage a formato compatible con ImageIO
                                     BufferedImage writeImage = image;
                                     if (format.equals("jpg")) {
                                         // JPEG no soporta transparencia, convertir a RGB
                                         if (writeImage.getType() != BufferedImage.TYPE_INT_RGB) {
-                                            BufferedImage rgbImage = new BufferedImage(writeImage.getWidth(), writeImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+                                            BufferedImage rgbImage = new BufferedImage(writeImage.getWidth(),
+                                                    writeImage.getHeight(), BufferedImage.TYPE_INT_RGB);
                                             rgbImage.getGraphics().drawImage(image, 0, 0, null);
                                             writeImage = rgbImage;
                                         }
                                     } else if (format.equals("bmp")) {
                                         // Asegurar tipo estándar para BMP
-                                        if (writeImage.getType() != BufferedImage.TYPE_INT_RGB && 
-                                            writeImage.getType() != BufferedImage.TYPE_INT_ARGB) {
-                                            BufferedImage newImage = new BufferedImage(writeImage.getWidth(), writeImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                                        if (writeImage.getType() != BufferedImage.TYPE_INT_RGB &&
+                                                writeImage.getType() != BufferedImage.TYPE_INT_ARGB) {
+                                            BufferedImage newImage = new BufferedImage(writeImage.getWidth(),
+                                                    writeImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
                                             newImage.getGraphics().drawImage(writeImage, 0, 0, null);
                                             writeImage = newImage;
                                         }
                                     }
-                                    
+
                                     ImageIO.write(writeImage, format, outputFile);
                                     exported++;
                                 }
@@ -885,7 +940,7 @@ public class Controller implements Initializable {
                             e.printStackTrace();
                         }
                     }
-                    
+
                     final int finalExported = exported;
                     final int finalErrors = errors;
                     Platform.runLater(() -> {
@@ -930,7 +985,7 @@ public class Controller implements Initializable {
         if (!directory.exists() || !directory.isDirectory()) {
             return;
         }
-        
+
         File[] files = directory.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -972,7 +1027,9 @@ public class Controller implements Initializable {
             try (UnrealPackage up = new UnrealPackage(new File(utxPathProperty.get()), true)) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ConvertTool.save(up, new File(savePath1), new PrintStream(baos, true, "utf-16le"));
-                Platform.runLater(() -> show(Alert.AlertType.INFORMATION, "Convert complete", baos.size() == 0 ? null : "Changelist", baos.size() == 0 ? "No changes." : new String(baos.toByteArray(), Charset.forName("utf-16le"))));
+                Platform.runLater(() -> show(Alert.AlertType.INFORMATION, "Convert complete",
+                        baos.size() == 0 ? null : "Changelist", baos.size() == 0 ? "No changes."
+                                : new String(baos.toByteArray(), Charset.forName("utf-16le"))));
             } catch (Exception e) {
                 Platform.runLater(() -> showError(e));
             } finally {
