@@ -4,104 +4,110 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<AnchorPane id="AnchorPane" prefWidth="350.0" prefHeight="340.0" style="-fx-background-color: #181818;" xmlns="http://javafx.com/javafx/8.0.40"
+<?import javafx.geometry.Insets?>
+
+<AnchorPane prefWidth="460.0" prefHeight="600.0" minWidth="420.0" minHeight="580.0" styleClass="root" xmlns="http://javafx.com/javafx/8.0.40"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="acmi.l2.clientmod.l2tool.Controller">
-    <HBox fx:id="titleBar" alignment="CENTER_LEFT" spacing="5.0" prefHeight="30.0" style="-fx-background-color: #181818;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-            <image>
-                <Image url="@L2Tool.png"/>
-            </image>
+    
+    <!-- Title Bar -->
+    <HBox fx:id="titleBar" alignment="CENTER_LEFT" spacing="8.0" prefHeight="32.0" styleClass="title-bar"
+          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <padding><Insets left="10"/></padding>
+        <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
+            <image><Image url="@L2Tool.png"/></image>
         </ImageView>
-        <Label fx:id="titleLabel" text="L2Tool" style="-fx-text-fill: #ffffff; -fx-font-size: 12px; -fx-font-weight: bold;" />
+        <Label text="L2Tool" styleClass="title-label"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="minimizeBtn" mnemonicParsing="false" onAction="#minimizeWindow" prefHeight="30.0" prefWidth="46.0" style="-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;" text="─" />
-        <Button fx:id="maximizeBtn" mnemonicParsing="false" onAction="#maximizeWindow" prefHeight="30.0" prefWidth="46.0" style="-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;" text="□" />
-        <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#closeWindow" prefHeight="30.0" prefWidth="46.0" style="-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;" text="✕" />
+        <Button fx:id="minimizeBtn" mnemonicParsing="false" onAction="#minimizeWindow" 
+                styleClass="window-button" text="─"/>
+        <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#closeWindow" 
+                styleClass="window-button, close-button" text="✕"/>
     </HBox>
-    <GridPane alignment="CENTER" hgap="2.0" vgap="2.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
-              AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="35.0">
-        <columnConstraints>
-            <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"/>
-            <ColumnConstraints maxWidth="1.7976931348623157E308"/>
-            <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"/>
-            <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"/>
-        </columnConstraints>
-        <Label text="img" style="-fx-text-fill: #e0e0e0; -fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0"/>
-        <TextField fx:id="imgPath" editable="false" style="-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: #404040; -fx-border-radius: 3; -fx-background-radius: 3;" GridPane.columnIndex="1" GridPane.columnSpan="2"
-                   GridPane.rowIndex="0"/>
-        <Button maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                style="-fx-background-color: #404040; -fx-text-fill: #e0e0e0; -fx-border-color: #555555; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;" onAction="#selectImage" text=".." GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-        <Label text="utx" style="-fx-text-fill: #e0e0e0; -fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
-        <TextField fx:id="utxPath" editable="false" style="-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: #404040; -fx-border-radius: 3; -fx-background-radius: 3;" GridPane.columnIndex="1" GridPane.columnSpan="2"
-                   GridPane.rowIndex="1"/>
-        <Button maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                style="-fx-background-color: #404040; -fx-text-fill: #e0e0e0; -fx-border-color: #555555; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;" onAction="#selectPackage" text=".." GridPane.columnIndex="3" GridPane.hgrow="ALWAYS"
-                GridPane.rowIndex="1"/>
-        <Button fx:id="textureInfo" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                style="-fx-background-color: #404040; -fx-text-fill: #e0e0e0; -fx-border-color: #555555; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;"
-                onAction="#showTextureInfo" text="?" GridPane.columnIndex="0" GridPane.halignment="CENTER"
-                GridPane.hgrow="ALWAYS" GridPane.rowIndex="2"/>
-        <ComboBox id="textures" fx:id="textureList" maxWidth="1.7976931348623157E308" 
-                  style="-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: #404040; -fx-border-radius: 3; -fx-background-radius: 3; -fx-control-inner-background: #2d2d2d; -fx-prompt-text-fill: #999999;"
-                  GridPane.columnIndex="1"
-                  GridPane.hgrow="ALWAYS" GridPane.rowIndex="2"/>
-        <Button fx:id="export" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
-                mnemonicParsing="false" style="-fx-background-color: #404040; -fx-text-fill: #e0e0e0; -fx-border-color: #555555; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;"
-                onAction="#exportTexture" text="export" GridPane.columnIndex="2"
-                GridPane.hgrow="ALWAYS" GridPane.rowIndex="2"/>
-        <Button fx:id="set" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity"
-                mnemonicParsing="false" style="-fx-background-color: #404040; -fx-text-fill: #e0e0e0; -fx-border-color: #555555; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;"
-                onAction="#replaceTexture" text="set" GridPane.columnIndex="3"
-                GridPane.rowIndex="2"/>
-        <Button fx:id="toUED" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" minHeight="-Infinity"
-                minWidth="-Infinity" mnemonicParsing="false" 
-                style="-fx-background-color: #404040; -fx-text-fill: #e0e0e0; -fx-border-color: #555555; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;"
-                onAction="#convertUTX" text="L2-&gt;UnrealED"
-                GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
-                GridPane.rowIndex="3"/>
-        <Button fx:id="view" mnemonicParsing="false" 
-                style="-fx-background-color: #404040; -fx-text-fill: #e0e0e0; -fx-border-color: #555555; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand;"
-                onAction="#showTexture" text="view" GridPane.columnIndex="1"
-                GridPane.rowIndex="3"/>
-        <Separator GridPane.columnIndex="0" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
-                   style="-fx-background-color: #404040;" GridPane.rowIndex="4"/>
-        <Label text="Batch Export Options" style="-fx-text-fill: #e0e0e0; -fx-font-weight: bold; -fx-font-size: 11px;" GridPane.columnIndex="0" GridPane.columnSpan="4" GridPane.halignment="CENTER"
-               GridPane.hgrow="ALWAYS" GridPane.rowIndex="5"/>
-        <Label text="Export format:" style="-fx-text-fill: #e0e0e0;" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="6"/>
-        <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="6">
-            <RadioButton fx:id="formatPNG" selected="true" text="PNG" style="-fx-text-fill: #e0e0e0; -fx-mark-color: #505050; -fx-background-color: transparent; -fx-cursor: hand;" />
-            <RadioButton fx:id="formatJPEG" text="JPEG" style="-fx-text-fill: #e0e0e0; -fx-mark-color: #505050; -fx-background-color: transparent; -fx-cursor: hand;" />
-            <RadioButton fx:id="formatBMP" text="BMP" style="-fx-text-fill: #e0e0e0; -fx-mark-color: #505050; -fx-background-color: transparent; -fx-cursor: hand;" />
-            <RadioButton fx:id="formatGIF" text="GIF" style="-fx-text-fill: #e0e0e0; -fx-mark-color: #505050; -fx-background-color: transparent; -fx-cursor: hand;" />
-            <RadioButton fx:id="formatWEBP" text="WEBP" style="-fx-text-fill: #e0e0e0; -fx-mark-color: #505050; -fx-background-color: transparent; -fx-cursor: hand;" />
-            <RadioButton fx:id="formatDDS" text="DDS" style="-fx-text-fill: #e0e0e0; -fx-mark-color: #505050; -fx-background-color: transparent; -fx-cursor: hand;" />
-        </HBox>
-        <CheckBox fx:id="keepStructure" selected="true" text="Keep folder structure" 
-                  style="-fx-text-fill: #e0e0e0;"
-                  GridPane.columnIndex="0"
-                  GridPane.columnSpan="2" GridPane.rowIndex="7"/>
-        <CheckBox fx:id="clearOutput" selected="false" text="Clear output before export"
-                  style="-fx-text-fill: #e0e0e0;"
-                  GridPane.columnIndex="0"
-                  GridPane.columnSpan="2" GridPane.rowIndex="8"/>
-        <Button fx:id="exportAll" maxWidth="1.7976931348623157E308" minHeight="-Infinity"
-                minWidth="-Infinity" mnemonicParsing="false" 
-                style="-fx-background-color: #505050; -fx-text-fill: #e0e0e0; -fx-border-color: #666666; -fx-border-radius: 3; -fx-background-radius: 3; -fx-cursor: hand; -fx-font-weight: bold;"
-                onAction="#exportAllTextures" text="export all"
-                GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS"
-                GridPane.rowIndex="8"/>
-        <rowConstraints>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-        </rowConstraints>
-    </GridPane>
-    <ProgressIndicator id="utxProgress" fx:id="progress" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+    
+    <!-- Main Content wrapped in ScrollPane -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane"
+                AnchorPane.topAnchor="40.0" AnchorPane.bottomAnchor="0.0" 
+                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <VBox spacing="6.0" style="-fx-background-color: transparent;">
+            <padding><Insets top="5" right="12" bottom="5" left="12"/></padding>
+            
+            <!-- Package Section -->
+            <VBox styleClass="card" spacing="8.0">
+                <Label text="PACKAGE" styleClass="section-header"/>
+                <HBox spacing="6.0" alignment="CENTER_LEFT">
+                    <TextField fx:id="utxPath" editable="false" promptText="Select a .utx file..." HBox.hgrow="ALWAYS"/>
+                    <Button mnemonicParsing="false" onAction="#selectPackage" styleClass="button">
+                        <graphic><Region styleClass="icon-browse"/></graphic>
+                        <tooltip><Tooltip text="Browse .utx pack"/></tooltip>
+                    </Button>
+                    <Button fx:id="toUED" mnemonicParsing="false" onAction="#convertUTX" text="→ UED" styleClass="button"/>
+                </HBox>
+            </VBox>
+            
+            <!-- Texture Section -->
+            <VBox styleClass="card" spacing="10.0">
+                <Label text="TEXTURE" styleClass="section-header"/>
+                <HBox spacing="6.0" alignment="CENTER_LEFT">
+                    <ComboBox fx:id="textureList" promptText="Select texture..." HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                </HBox>
+                <HBox spacing="8.0" alignment="CENTER_LEFT">
+                    <Button fx:id="textureInfo" mnemonicParsing="false" onAction="#showTextureInfo" text="Info" styleClass="button">
+                        <graphic><Region styleClass="icon-info"/></graphic>
+                    </Button>
+                    <Button fx:id="view" mnemonicParsing="false" onAction="#showTexture" text="View" styleClass="button">
+                        <graphic><Region styleClass="icon-view"/></graphic>
+                    </Button>
+                    <Button fx:id="export" mnemonicParsing="false" onAction="#exportTexture" text="Export" styleClass="button">
+                        <graphic><Region styleClass="icon-export"/></graphic>
+                    </Button>
+                </HBox>
+            </VBox>
+            
+            <!-- Batch Export Section -->
+            <VBox styleClass="card" spacing="12.0">
+                <Label text="BATCH EXPORT" styleClass="section-header"/>
+                
+                <Label text="Format:" styleClass="label-bright"/>
+                <FlowPane hgap="12.0" vgap="8.0">
+                    <RadioButton fx:id="formatPNG" selected="true" text="PNG"/>
+                    <RadioButton fx:id="formatJPEG" text="JPEG"/>
+                    <RadioButton fx:id="formatBMP" text="BMP"/>
+                    <RadioButton fx:id="formatGIF" text="GIF"/>
+                    <RadioButton fx:id="formatWEBP" text="WEBP"/>
+                    <RadioButton fx:id="formatDDS" text="DDS"/>
+                </FlowPane>
+                
+                <Separator/>
+                
+                <VBox spacing="8.0">
+                    <CheckBox fx:id="keepStructure" selected="true" text="Keep folder structure"/>
+                    <CheckBox fx:id="clearOutput" selected="false" text="Clear output folder"/>
+                </VBox>
+                
+                <Button fx:id="exportAll" maxWidth="1.7976931348623157E308" mnemonicParsing="false" 
+                        onAction="#exportAllTextures" text="Export All Textures" styleClass="button-primary">
+                    <graphic><Region styleClass="icon-export" style="-fx-background-color: white;"/></graphic>
+                </Button>
+            </VBox>
+            
+            <!-- Replace Texture Section -->
+            <VBox styleClass="card" spacing="8.0">
+                <Label text="REPLACE TEXTURE" styleClass="section-header"/>
+                <HBox spacing="6.0" alignment="CENTER_LEFT">
+                    <TextField fx:id="imgPath" editable="false" promptText="Select image to import..." HBox.hgrow="ALWAYS"/>
+                    <Button mnemonicParsing="false" onAction="#selectImage" styleClass="button">
+                         <graphic><Region styleClass="icon-browse"/></graphic>
+                    </Button>
+                </HBox>
+                <Button fx:id="set" maxWidth="1.7976931348623157E308" mnemonicParsing="false" 
+                        onAction="#replaceTexture" text="Replace Selected Texture" styleClass="button-primary">
+                    <graphic><Region styleClass="icon-replace"/></graphic>
+                </Button>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+    
+    <!-- Progress Indicator Overlay -->
+    <ProgressIndicator fx:id="progress" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                        AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
 </AnchorPane>

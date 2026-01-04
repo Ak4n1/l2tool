@@ -1,0 +1,26 @@
+LOG: Initializing controller...
+LOG: Button injection check: view=true, info=true
+LOG: AutoCompleteComboBox initialized.
+LOG: Binding eval: NULL
+LOG: Button listeners manually attached.
+LOG: Package path changed to: D:\Clients\terra_dev\SysTextures\BranchIcon.utx
+LOG: Starting to load package contents...
+LOG: Sorting 440 textures...
+LOG: Texture list updated and sorted.
+LOG: Progress hidden.
+LOG: lastSelectedTexture UPDATED to: Icon.accessary_lbracelet_sign_agathion_dec_i00
+LOG: Binding eval: Icon.accessary_lbracelet_sign_agathion_dec_i00
+LOG: Selection changed to: Icon.accessary_lbracelet_sign_agathion_dec_i00
+LOG: lastSelectedTexture UPDATED to: Icon.accessary_lbracelet_sign_agathion_dec_i00
+LOG: Binding eval: NULL
+LOG: Selection changed to: NULL
+LOG: Selection visually lost, keeping persistent: Icon.accessary_lbracelet_sign_agathion_dec_i00
+LOG: lastSelectedTexture UPDATED to: Icon.accessary_lbracelet_sign_agathion_aug_i00_64
+LOG: Binding eval: Icon.accessary_lbracelet_sign_agathion_aug_i00_64
+LOG: Selection changed to: Icon.accessary_lbracelet_sign_agathion_aug_i00_64
+LOG: lastSelectedTexture UPDATED to: Icon.accessary_lbracelet_sign_agathion_aug_i00_64
+LOG: Binding eval: NULL
+LOG: Selection changed to: NULL
+LOG: Selection visually lost, keeping persistent: Icon.accessary_lbracelet_sign_agathion_aug_i00_64
+LOG: exportTexture CLICKED
+LOG: Exporting Icon.accessary_lbracelet_sign_agathion_aug_i00_64 to C:\Users\JeeP_\git\l2tool\output_selected\Icon.accessary_lbracelet_sign_agathion_aug_i00_64.png

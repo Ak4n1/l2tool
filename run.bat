@@ -10,6 +10,6 @@ if not exist "javafx-sdk-17.0.2" (
 
 cd ..
 echo Running L2Tool...
-java --module-path "javafx\javafx-sdk-17.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.base,javafx.graphics,javafx.swing -jar build\libs\l2tool.jar
+java --module-path "javafx\javafx-sdk-17.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.base,javafx.graphics,javafx.swing -jar build\libs\l2tool.jar > l2tool.log 2>&1
 
 pause

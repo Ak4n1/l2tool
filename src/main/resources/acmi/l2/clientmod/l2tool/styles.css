@@ -1,51 +1,355 @@
-.combo-box {
-    -fx-background-color: #2d2d2d;
+/* ===== L2Tool Modern Dark Theme ===== */
+
+/* Root styling */
+.root {
+    -fx-background-color: #1a1a2e;
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
+    -fx-font-size: 12px;
+}
+
+/* ===== Cards/Panels ===== */
+.card {
+    -fx-background-color: #16213e;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0, 0, 2);
+}
+
+/* ===== Title Bar ===== */
+.title-bar {
+    -fx-background-color: #0f0f1a;
+    -fx-padding: 3;
+}
+
+.title-label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.window-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #888888;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-min-width: 46;
+    -fx-min-height: 30;
+    -fx-font-size: 12px;
+}
+
+.window-button:hover {
+    -fx-background-color: #2d2d4a;
+    -fx-text-fill: #ffffff;
+}
+
+.close-button:hover {
+    -fx-background-color: #e94560;
+    -fx-text-fill: #ffffff;
+}
+
+/* ===== Section Headers ===== */
+.section-header {
+    -fx-text-fill: #e94560;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5 0;
+}
+
+/* ===== Labels ===== */
+.label {
+    -fx-text-fill: #a0a0b0;
+}
+
+.label-bright {
     -fx-text-fill: #e0e0e0;
-    -fx-border-color: #404040;
-    -fx-border-radius: 3;
-    -fx-background-radius: 3;
+}
+
+/* ===== Text Fields ===== */
+.text-field {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #1a4a7a;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 6 10;
+    -fx-prompt-text-fill: #606080;
+}
+
+.text-field:focused {
+    -fx-border-color: #e94560;
+    -fx-background-color: #0f3460;
+}
+
+/* ===== Buttons ===== */
+.button {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #1a5a8a;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+    -fx-font-size: 11px;
+}
+
+.button:hover {
+    -fx-background-color: #1a5a8a;
+    -fx-border-color: #2a6a9a;
+}
+
+.button:pressed {
+    -fx-background-color: #0a2540;
+}
+
+.button:disabled {
+    -fx-background-color: #252540;
+    -fx-text-fill: #505060;
+    -fx-border-color: #303050;
+}
+
+/* Primary action buttons */
+.button-primary {
+    -fx-background-color: linear-gradient(to bottom, #e94560, #c73550);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: transparent;
+    -fx-font-weight: bold;
+}
+
+.button-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #ff5570, #e94560);
+}
+
+.button-primary:pressed {
+    -fx-background-color: #c73550;
+}
+
+/* Small icon buttons */
+.button-icon {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #1a5a8a;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+    -fx-min-width: 28;
+    -fx-cursor: hand;
+}
+
+.button-icon:hover {
+    -fx-background-color: #1a5a8a;
+}
+
+/* ===== ComboBox ===== */
+.combo-box {
+    -fx-background-color: #0f3460;
+    -fx-border-color: #1a4a7a;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
 }
 
 .combo-box .list-cell {
-    -fx-background-color: #2d2d2d;
+    -fx-background-color: #0f3460;
     -fx-text-fill: #e0e0e0;
-}
-
-.combo-box .list-view {
-    -fx-background-color: #2d2d2d;
-}
-
-.combo-box .list-cell:hover {
-    -fx-background-color: #404040;
+    -fx-padding: 4 8;
 }
 
 .combo-box .arrow-button {
     -fx-background-color: transparent;
+    -fx-padding: 0 8;
 }
 
 .combo-box .arrow {
-    -fx-background-color: #e0e0e0;
+    -fx-background-color: #a0a0b0;
+}
+
+.combo-box:hover .arrow {
+    -fx-background-color: #e94560;
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: #2d2d2d;
+    -fx-background-color: #16213e;
+    -fx-border-color: #1a4a7a;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 10, 0, 0, 4);
 }
 
 .combo-box-popup .list-view .list-cell {
-    -fx-background-color: #2d2d2d;
+    -fx-background-color: #16213e;
     -fx-text-fill: #e0e0e0;
+    -fx-padding: 6 10;
 }
 
 .combo-box-popup .list-view .list-cell:hover {
-    -fx-background-color: #404040;
+    -fx-background-color: #0f3460;
 }
 
 .combo-box-popup .list-view .list-cell:selected {
-    -fx-background-color: #505050;
+    -fx-background-color: #e94560;
+    -fx-text-fill: #ffffff;
+}
+
+/* ===== Radio Buttons ===== */
+.radio-button {
+    -fx-text-fill: #a0a0b0;
+    -fx-cursor: hand;
+}
+
+.radio-button:selected {
     -fx-text-fill: #e0e0e0;
 }
 
-.root {
-    -fx-background-color: #181818;
+.radio-button .radio {
+    -fx-background-color: #0f3460;
+    -fx-border-color: #1a5a8a;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
 }
 
+.radio-button:selected .radio {
+    -fx-background-color: #0f3460;
+    -fx-border-color: #e94560;
+}
+
+.radio-button .dot {
+    -fx-background-color: transparent;
+}
+
+.radio-button:selected .dot {
+    -fx-background-color: #e94560;
+}
+
+/* ===== Check Boxes ===== */
+.check-box {
+    -fx-text-fill: #a0a0b0;
+    -fx-cursor: hand;
+}
+
+.check-box:selected {
+    -fx-text-fill: #e0e0e0;
+}
+
+.check-box .box {
+    -fx-background-color: #0f3460;
+    -fx-border-color: #1a5a8a;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #e94560;
+    -fx-border-color: #e94560;
+}
+
+.check-box .mark {
+    -fx-background-color: transparent;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: #ffffff;
+}
+
+/* ===== Separator ===== */
+.separator .line {
+    -fx-border-color: #2a2a4a;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ===== Progress Indicator ===== */
+.progress-indicator {
+    -fx-progress-color: #e94560;
+}
+
+.progress-indicator .indicator {
+    -fx-background-color: rgba(26, 26, 46, 0.9);
+    -fx-background-radius: 8;
+    -fx-padding: 20;
+}
+
+/* ===== ScrollPane ===== */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar {
+    -fx-background-color: #16213e;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #0f3460;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #1a5a8a;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #505070;
+}
+
+/* ===== SVG Icons ===== */
+.icon-info {
+    -fx-shape: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z";
+    -fx-background-color: #e0e0e0;
+    -fx-min-width: 14;
+    -fx-min-height: 14;
+    -fx-pref-width: 14;
+    -fx-pref-height: 14;
+    -fx-max-width: 14;
+    -fx-max-height: 14;
+}
+
+.icon-view {
+    -fx-shape: "M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z";
+    -fx-background-color: #e0e0e0;
+    -fx-min-width: 16;
+    -fx-min-height: 12;
+    -fx-pref-width: 16;
+    -fx-pref-height: 12;
+    -fx-max-width: 16;
+    -fx-max-height: 12;
+}
+
+.icon-export {
+    -fx-shape: "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z";
+    -fx-background-color: #e0e0e0;
+    -fx-min-width: 14;
+    -fx-min-height: 14;
+    -fx-pref-width: 14;
+    -fx-pref-height: 14;
+    -fx-max-width: 14;
+    -fx-max-height: 14;
+}
+
+.icon-browse {
+    -fx-shape: "M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z";
+    -fx-background-color: #e0e0e0;
+    -fx-min-width: 14;
+    -fx-min-height: 12;
+    -fx-pref-width: 14;
+    -fx-pref-height: 12;
+    -fx-max-width: 14;
+    -fx-max-height: 12;
+}
+
+.icon-replace {
+    -fx-shape: "M1 18l3.5-3.5 1.41 1.41L2.83 19h11.17v-4h2v6H1v-3zM14.5 3.5l-1.41 1.41L16.17 8H5v4H3V6h13.17l-3.08-3.09L14.5 1.5l5 5-5 5z";
+    -fx-background-color: #ffffff;
+    -fx-min-width: 14;
+    -fx-min-height: 14;
+    -fx-pref-width: 14;
+    -fx-pref-height: 14;
+    -fx-max-width: 14;
+    -fx-max-height: 14;
+}

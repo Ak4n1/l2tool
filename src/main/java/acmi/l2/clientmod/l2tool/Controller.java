@@ -24,7 +24,7 @@ package acmi.l2.clientmod.l2tool;
 import acmi.l2.clientmod.io.*;
 import acmi.l2.clientmod.io.RandomAccessFile;
 import acmi.l2.clientmod.l2tool.img.*;
-import acmi.l2.clientmod.l2tool.textureview.TextureView;
+
 import acmi.l2.clientmod.l2tool.img.MipMapInfo;
 import acmi.l2.clientmod.l2tool.img.TextureProperties;
 import acmi.l2.clientmod.texconv.ConvertTool;
@@ -40,15 +40,26 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-
+import javafx.stage.StageStyle;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
+import javafx.scene.control.Separator;
+import java.awt.Desktop;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
@@ -130,8 +141,6 @@ public class Controller implements Initializable {
     @FXML
     private Button minimizeBtn;
     @FXML
-    private Button maximizeBtn;
-    @FXML
     private Button closeBtn;
 
     private static final Set<Img.Format> SUPPORTED_FORMATS = new HashSet<Img.Format>() {
@@ -151,9 +160,10 @@ public class Controller implements Initializable {
         }
     };
 
-    private Stage textureViewWindow;
-    private TextureView textureViewController;
-    private Future loadImageTaskFuture;
+    // private Dialog<Void> textureViewDialog;
+    // private ImageView textureViewImage;
+    // private Future loadImageTaskFuture;
+    private MipMapInfo lastSelectedTexture;
 
     private double xOffset = 0;
     private double yOffset = 0;
@@ -171,27 +181,6 @@ public class Controller implements Initializable {
                 application.getStage().setX(event.getScreenX() - xOffset);
                 application.getStage().setY(event.getScreenY() - yOffset);
             });
-
-            if (minimizeBtn != null) {
-                minimizeBtn.setOnMouseEntered(e -> minimizeBtn.setStyle(
-                        "-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
-                minimizeBtn.setOnMouseExited(e -> minimizeBtn.setStyle(
-                        "-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
-            }
-
-            if (maximizeBtn != null) {
-                maximizeBtn.setOnMouseEntered(e -> maximizeBtn.setStyle(
-                        "-fx-background-color: #2d2d2d; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
-                maximizeBtn.setOnMouseExited(e -> maximizeBtn.setStyle(
-                        "-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
-            }
-
-            if (closeBtn != null) {
-                closeBtn.setOnMouseEntered(e -> closeBtn.setStyle(
-                        "-fx-background-color: #c42b1c; -fx-text-fill: #ffffff; -fx-border-color: transparent; -fx-cursor: hand;"));
-                closeBtn.setOnMouseExited(e -> closeBtn.setStyle(
-                        "-fx-background-color: #181818; -fx-text-fill: #e0e0e0; -fx-border-color: transparent; -fx-cursor: hand;"));
-            }
         }
     }
 
@@ -199,20 +188,6 @@ public class Controller implements Initializable {
     private void minimizeWindow() {
         if (application != null) {
             application.getStage().setIconified(true);
-        }
-    }
-
-    @FXML
-    private void maximizeWindow() {
-        if (application != null) {
-            Stage stage = application.getStage();
-            if (stage.isMaximized()) {
-                stage.setMaximized(false);
-                maximizeBtn.setText("□");
-            } else {
-                stage.setMaximized(true);
-                maximizeBtn.setText("❐");
-            }
         }
     }
 
@@ -225,18 +200,45 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        System.out.println("LOG: Initializing controller...");
+        System.out.println("LOG: Button injection check: view=" + (view != null) + ", info=" + (textureInfo != null));
+
         progress.setVisible(false);
 
         utxPath.textProperty().bind(utxPathProperty);
-
         textureList.disableProperty().bind(utxPathProperty.isNull());
-        toUED.disableProperty().bind(Bindings.createBooleanBinding(
-                () -> utxPathProperty.get() == null || utxPathProperty.get().endsWith("ugx"), utxPathProperty));
-        BooleanBinding textureNotSelected = utxPathProperty.isNull().or(textureInfoProperty.isNull());
-        export.disableProperty().bind(textureNotSelected);
-        textureInfo.disableProperty().bind(textureNotSelected);
-        view.disableProperty().bind(textureNotSelected);
-        set.disableProperty().bind(imgProperty.isNull().or(textureInfoProperty.isNull()));
+
+        // NO BINDING for view/info buttons to keep them enabled for debug
+        view.setDisable(false);
+        textureInfo.setDisable(false);
+        export.setDisable(false);
+        set.setDisable(false);
+
+        // Listener de selección
+        textureList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                lastSelectedTexture = newVal;
+                System.out.println("LOG: lastSelectedTexture UPDATED to: " + newVal.name);
+            } else if (lastSelectedTexture != null) {
+                // Si el combo se limpia visualmente (foco, búsqueda),
+                // restauramos internamente para que View/Info/Export sigan funcionando
+                System.out.println("LOG: Selection visually lost, keeping persistent: " + lastSelectedTexture.name);
+            }
+        });
+
+        // Corregir ClassCastException del AutoComplete
+        textureList.setConverter(new javafx.util.StringConverter<MipMapInfo>() {
+            @Override
+            public String toString(MipMapInfo object) {
+                return object == null ? "" : object.name;
+            }
+
+            @Override
+            public MipMapInfo fromString(String string) {
+                return null;
+            }
+        });
+
         exportAll.disableProperty().bind(utxPathProperty.isNull());
 
         formatGroup = new ToggleGroup();
@@ -256,16 +258,18 @@ public class Controller implements Initializable {
         }
 
         utxPathProperty.addListener((observableValue, oldPackagePath, newPackagePath) -> {
+            System.out.println("LOG: Package path changed to: " + newPackagePath);
             textureList.getSelectionModel().clearSelection();
             textureList.getItems().clear();
 
             ForkJoinPool.commonPool().execute(() -> {
                 Platform.runLater(() -> {
+                    System.out.println("LOG: Starting to load package contents...");
                     progress.setProgress(0);
                     progress.setVisible(true);
                 });
 
-                try (UnrealPackage up = new UnrealPackage(new File(newPackagePath), true)) {
+                try (UnrealPackage up = new UnrealPackage(newPackagePath, true)) {
                     up.getNameTable();
                     up.getImportTable();
                     int exportSize = up.getExportTable().size();
@@ -362,31 +366,47 @@ public class Controller implements Initializable {
                     }
 
                     Platform.runLater(() -> {
+                        System.out.println("LOG: Sorting " + textureList.getItems().size() + " textures...");
                         sort(textureList.getItems(),
                                 (o1, o2) -> o1.name.toLowerCase().compareTo(o2.name.toLowerCase()));
-
-                        AutoCompleteComboBox.autoCompleteComboBox(textureList,
-                                AutoCompleteComboBox.AutoCompleteMode.CONTAINING);
+                        System.out.println("LOG: Texture list updated and sorted.");
                     });
                 } catch (final Exception e) {
+                    System.out.println("LOG: ERROR loading package: " + e.getMessage());
+                    e.printStackTrace(System.out);
                     Platform.runLater(() -> showError(e));
                 } finally {
-                    Platform.runLater(() -> progress.setVisible(false));
+                    Platform.runLater(() -> {
+                        progress.setVisible(false);
+                        System.out.println("LOG: Progress hidden.");
+                    });
                 }
             });
         });
 
-        textureInfoProperty.bind(Bindings.createObjectBinding(() -> AutoCompleteComboBox.getSelectedItem(textureList),
-                textureList.getSelectionModel().selectedIndexProperty()));
+        AutoCompleteComboBox.autoCompleteComboBox(textureList,
+                AutoCompleteComboBox.AutoCompleteMode.CONTAINING);
+        System.out.println("LOG: AutoCompleteComboBox initialized.");
 
-        imgInitialDirectory.addListener(
-                (observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_IMAGE_INITIAL_DIRECTORY, newValue));
-        utxInitialDirectory.addListener(
-                (observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_UTX_INITIAL_DIRECTORY, newValue));
-        exportInitialDirectory.addListener(
-                (observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_EXPORT_INITIAL_DIRECTORY, newValue));
-        uedInitialDirectory.addListener(
-                (observable, oldValue, newValue) -> L2Tool.getPrefs().put(KEY_UED_INITIAL_DIRECTORY, newValue));
+        textureInfoProperty.bind(Bindings.createObjectBinding(() -> {
+            MipMapInfo selected = AutoCompleteComboBox.getSelectedItem(textureList);
+            System.out.println("LOG: Binding eval: " + (selected != null ? selected.name : "NULL"));
+            return selected;
+        }, textureList.getSelectionModel().selectedIndexProperty()));
+
+        textureInfoProperty.addListener((obs, oldV, newV) -> {
+            System.out.println("LOG: Selection changed to: " + (newV != null ? newV.name : "NULL"));
+            if (newV != null) {
+                lastSelectedTexture = newV;
+                System.out.println("LOG: lastSelectedTexture UPDATED to: " + newV.name);
+            }
+        });
+
+        // Asegurar que los botones respondan incluso si el FXML falla
+        textureInfo.setOnAction(e -> showTextureInfo());
+        view.setOnAction(e -> showTexture());
+
+        System.out.println("LOG: Button listeners manually attached.");
     }
 
     @FXML
@@ -473,168 +493,172 @@ public class Controller implements Initializable {
 
     @FXML
     private void showTextureInfo() {
-        show(Alert.AlertType.INFORMATION,
-                "Texture info",
-                this.textureInfoProperty.get().name,
-                "Format:\t\t" + this.textureInfoProperty.get().format +
-                        "\nMipMaps:\t\t" + this.textureInfoProperty.get().offsets.length +
-                        "\nWidth:\t\t" + this.textureInfoProperty.get().width +
-                        "\nHeight:\t\t" + this.textureInfoProperty.get().height);
+        System.out.println("LOG: showTextureInfo CLICKED (Unified UI)");
+        MipMapInfo info = (textureInfoProperty.get() != null) ? textureInfoProperty.get() : lastSelectedTexture;
+
+        if (info == null) {
+            show(Alert.AlertType.WARNING, "Selection Required", null, "Please select a texture first.");
+            return;
+        }
+
+        VBox content = new VBox(10);
+        GridPane grid = new GridPane();
+        grid.setHgap(15);
+        grid.setVgap(8);
+
+        addInfoRow(grid, 0, "Format:", info.format.toString());
+        addInfoRow(grid, 1, "Dimensions:", info.width + " x " + info.height);
+        addInfoRow(grid, 2, "MipMaps:", String.valueOf(info.offsets.length));
+        addInfoRow(grid, 3, "Export Index:", String.valueOf(info.exportIndex));
+        if (info.sizes != null && info.sizes.length > 0) {
+            addInfoRow(grid, 4, "Data Size:", (info.sizes[0] / 1024) + " KB (Main Mip)");
+        }
+        content.getChildren().add(grid);
+
+        showCustomDialog("Texture Details", content, "info");
+    }
+
+    private void addInfoRow(GridPane grid, int row, String label, String value) {
+        Label lblKey = new Label(label);
+        lblKey.setStyle("-fx-text-fill: #888; -fx-font-weight: bold;");
+        Label lblVal = new Label(value);
+        lblVal.setStyle("-fx-text-fill: #eee;");
+        grid.add(lblKey, 0, row);
+        grid.add(lblVal, 1, row);
+    }
+
+    private void updateTextureInfoLabel(MipMapInfo info) {
+        // Stubbed to fix compilation
     }
 
     @FXML
     private void showTexture() {
-        if (textureViewWindow == null) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("textureview/view.fxml"));
-                StackPane pane = loader.load();
+        System.out.println("LOG: showTexture CLICKED");
+        MipMapInfo info = (textureInfoProperty.get() != null) ? textureInfoProperty.get() : lastSelectedTexture;
 
-                textureViewController = loader.getController();
-                textureInfoProperty.addListener((observable, oldValue, newValue) -> {
-                    if (!textureViewWindow.isShowing())
-                        return;
-
-                    if (newValue == null) {
-                        textureViewController.imageProperty().setValue(null);
-                        return;
-                    }
-
-                    if (!loadImageTaskFuture.isDone())
-                        loadImageTaskFuture.cancel(false);
-                    loadImageTaskFuture = ForkJoinPool.commonPool().submit(new LoadUtxImageTask(textureViewController));
-                });
-
-                textureViewWindow = new Stage();
-                textureViewWindow.getIcons().add(new Image(getClass().getResourceAsStream("L2Tool.png")));
-                textureViewWindow.setScene(new Scene(pane));
-                textureViewWindow.titleProperty()
-                        .bind(Bindings.createStringBinding(
-                                () -> Optional.ofNullable(textureInfoProperty.get()).map(o -> o.name).orElse(""),
-                                textureInfoProperty));
-            } catch (IOException e) {
-                showError(e);
-            }
+        if (info == null) {
+            System.out.println("LOG: showTexture FAILED - info is null");
+            show(Alert.AlertType.WARNING, "Selection Required", null, "Please select a texture first.");
+            return;
         }
 
-        if (textureViewWindow.isShowing()) {
-            textureViewWindow.close();
-        } else {
-            textureViewWindow.show();
-            loadImageTaskFuture = ForkJoinPool.commonPool().submit(new LoadUtxImageTask(textureViewController));
+        try {
+            System.out.println("LOG: Loading texture data for " + info.name + "...");
+            BufferedImage img = loadUtxImage(info);
+            if (img == null) {
+                System.out.println("LOG: Error - BufferedImage is null.");
+                show(Alert.AlertType.ERROR, "Error", null, "Could not load image data.");
+                return;
+            }
+
+            File tempFile = File.createTempFile("l2tool_view_" + info.name + "_", ".png");
+            // Se elimina al salir de la App, pero no ahora
+            // tempFile.deleteOnExit();
+
+            ImageIO.write(img, "png", tempFile);
+            System.out.println("LOG: Temp PNG created: " + tempFile.getAbsolutePath());
+
+            if (Desktop.isDesktopSupported()) {
+                System.out.println("LOG: Opening system viewer...");
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                System.out.println("LOG: Desktop not supported, showing info instead.");
+                show(Alert.AlertType.INFORMATION, "View (Manual)", info.name,
+                        "Texture saved to: " + tempFile.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            System.out.println("LOG: ERROR in showTexture");
+            e.printStackTrace(System.out);
+            showError(e);
         }
     }
 
-    private BufferedImage loadUtxImage() throws Exception {
+    private BufferedImage loadUtxImage(MipMapInfo info) throws Exception {
         try (UnrealPackage utx = new UnrealPackage(new File(utxPathProperty.get()), true)) {
-            UnrealPackage.ExportEntry texture = utx.getExportTable().get(textureInfoProperty.get().exportIndex);
+            UnrealPackage.ExportEntry texture = utx.getExportTable().get(info.exportIndex);
             byte[] raw = texture.getObjectRawData();
-            switch (textureInfoProperty.get().format) {
+            switch (info.format) {
                 case RGBA8:
-                    return TGA.createFromData(raw, textureInfoProperty.get()).getMipMaps()[0];
+                    return TGA.createFromData(raw, info).getMipMaps()[0];
                 case DXT1:
                 case DXT3:
                 case DXT5:
-                    return DDS.createFromData(raw, textureInfoProperty.get()).getMipMaps()[0];
+                    return DDS.createFromData(raw, info).getMipMaps()[0];
                 case G16:
-                    return G16.createFromData(raw, textureInfoProperty.get()).getMipMaps()[0];
+                    return G16.createFromData(raw, info).getMipMaps()[0];
                 case P8:
-                    return P8.createFromData(raw, textureInfoProperty.get()).getMipMaps()[0];
+                    return P8.createFromData(raw, info).getMipMaps()[0];
                 // Nuevos formatos
                 case RGB8:
                 case L8:
                 case RGBA7:
                 case RGB16:
                 case RRRGGGBBB:
-                    return GenericTexture.createFromData(raw, textureInfoProperty.get()).getMipMaps()[0];
+                    return GenericTexture.createFromData(raw, info).getMipMaps()[0];
                 default:
-                    throw new Exception("Unsupported format " + textureInfoProperty.get().format);
+                    throw new Exception("Unsupported format " + info.format);
             }
-        }
-    }
-
-    private class LoadUtxImageTask extends Task<BufferedImage> {
-        LoadUtxImageTask(TextureView controller) {
-            this.setOnSucceeded(event -> controller.imageProperty().setValue(this.getValue()));
-            this.setOnFailed(event -> {
-                // noinspection ThrowableResultOfMethodCallIgnored
-                Throwable e = event.getSource().getException();
-                if (e != null) {
-                    showError(e);
-                } else {
-                    show(Alert.AlertType.ERROR, "Error", null, "Couldn't load image");
-                }
-            });
-        }
-
-        @Override
-        protected BufferedImage call() throws Exception {
-            try {
-                return loadUtxImage();
-            } catch (Exception e) {
-                setException(e);
-            }
-            return null;
         }
     }
 
     @FXML
     private void exportTexture() {
+        System.out.println("LOG: exportTexture CLICKED");
+        MipMapInfo info = (textureInfoProperty.get() != null) ? textureInfoProperty.get() : lastSelectedTexture;
+
+        if (info == null) {
+            show(Alert.AlertType.WARNING, "Selection Required", null, "Please select a texture first.");
+            return;
+        }
+
         try (UnrealPackage utx = new UnrealPackage(new File(utxPathProperty.get()), true)) {
-            MipMapInfo info = textureInfoProperty.get();
+            File outputDir = new File("output_selected");
+            if (!outputDir.exists())
+                outputDir.mkdirs();
 
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save " + info.format);
-            if (exportInitialDirectory.getValue() == null)
-                exportInitialDirectory.setValue(utxInitialDirectory.get());
-            switch (info.format) {
-                case DXT1:
-                case DXT3:
-                case DXT5:
-                    fileChooser.getExtensionFilters()
-                            .add(new FileChooser.ExtensionFilter("Direct Draw Surface", "*.dds"));
-                    break;
-                case RGBA8:
-                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("32-bit Targa", "*.tga"));
-                    break;
-                case G16:
-                    fileChooser.getExtensionFilters()
-                            .add(new FileChooser.ExtensionFilter("16-bit Grayscale BMP", "*.bmp"));
-                    break;
-                case P8:
-                    fileChooser.getExtensionFilters()
-                            .add(new FileChooser.ExtensionFilter("8-bit Palettized BMP", "*.bmp"));
-                    break;
+            String format = "png";
+            String extension = ".png";
+            if (formatJPEG.isSelected()) {
+                format = "jpg";
+                extension = ".jpg";
+            } else if (formatBMP.isSelected()) {
+                format = "bmp";
+                extension = ".bmp";
+            } else if (formatGIF.isSelected()) {
+                format = "gif";
+                extension = ".gif";
+            } else if (formatWEBP.isSelected()) {
+                format = "webp";
+                extension = ".webp";
+            } else if (formatDDS.isSelected() && (info.format == Img.Format.DXT1 || info.format == Img.Format.DXT3
+                    || info.format == Img.Format.DXT5)) {
+                format = "dds";
+                extension = ".dds";
             }
-            File dir = new File(exportInitialDirectory.get());
-            if (dir.exists() && dir.isDirectory())
-                fileChooser.setInitialDirectory(dir);
-            fileChooser.setInitialFileName(textureInfoProperty.get().name + "."
-                    + fileChooser.getExtensionFilters().get(0).getExtensions().get(0).substring(2));
 
-            final File file = fileChooser.showSaveDialog(application.getStage());
-            if (file == null)
-                return;
-            exportInitialDirectory.setValue(file.getParent());
+            File outputFile = new File(outputDir, info.name + extension);
+            System.out.println("LOG: Exporting " + info.name + " to " + outputFile.getAbsolutePath());
 
-            UnrealPackage.ExportEntry texture = utx.getExportTable().get(info.exportIndex);
-            byte[] raw = texture.getObjectRawData();
-            switch (info.format) {
-                case DXT1:
-                case DXT3:
-                case DXT5:
-                    DDS.createFromData(raw, info).write(file);
-                    break;
-                case RGBA8:
-                    TGA.createFromData(raw, info).write(file);
-                    break;
-                case G16:
-                    G16.createFromData(raw, info).write(file);
-                    break;
-                case P8:
-                    P8.createFromData(raw, info).write(file);
-                    break;
+            if (format.equals("dds")) {
+                UnrealPackage.ExportEntry texture = utx.getExportTable().get(info.exportIndex);
+                DDS.createFromData(texture.getObjectRawData(), info).write(outputFile);
+            } else {
+                BufferedImage image = loadUtxImage(info);
+                // Conversiones de compatibilidad similares a exportAll
+                BufferedImage writeImage = image;
+                if (format.equals("jpg") && writeImage.getType() != BufferedImage.TYPE_INT_RGB) {
+                    BufferedImage rgbImage = new BufferedImage(writeImage.getWidth(), writeImage.getHeight(),
+                            BufferedImage.TYPE_INT_RGB);
+                    rgbImage.getGraphics().drawImage(image, 0, 0, null);
+                    writeImage = rgbImage;
+                }
+                ImageIO.write(writeImage, format, outputFile);
             }
+
+            show(Alert.AlertType.INFORMATION, "Success", null, "Texture exported to:\n" + outputFile.getAbsolutePath());
         } catch (Exception e) {
+            System.out.println("LOG: ERROR in exportTexture");
+            e.printStackTrace(System.out);
             showError(e);
         }
     }
@@ -700,7 +724,7 @@ public class Controller implements Initializable {
 
         try {
             File utxFile = new File(utxPathProperty.get());
-            File outputDir = new File("output");
+            File outputDir = new File("output_all");
 
             if (clearOutput.isSelected() && outputDir.exists()) {
                 try {
@@ -1038,16 +1062,123 @@ public class Controller implements Initializable {
         });
     }
 
-    private static void show(Alert.AlertType alertType, String title, String headerText, String contentText) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(headerText);
-        alert.setContentText(contentText);
-        alert.show();
+    private void show(Alert.AlertType alertType, String title, String headerText, String contentText) {
+        if (alertType == Alert.AlertType.INFORMATION || alertType == Alert.AlertType.CONFIRMATION) {
+            VBox content = new VBox(5);
+            if (headerText != null) {
+                Label header = new Label(headerText);
+                header.setStyle("-fx-text-fill: #00d2ff; -fx-font-weight: bold;");
+                content.getChildren().add(header);
+            }
+            Label msg = new Label(contentText);
+            msg.setStyle("-fx-text-fill: #eee;");
+            msg.setWrapText(true);
+            content.getChildren().add(msg);
+
+            showCustomDialog(title, content, "success");
+        } else {
+            // Keep standard alert for Warnings/Errors for now or map them too
+            Alert alert = new Alert(alertType);
+            if (application != null && application.getStage() != null) {
+                alert.initOwner(application.getStage());
+            }
+            alert.setTitle(title);
+            alert.setHeaderText(headerText);
+            alert.setContentText(contentText);
+            alert.show();
+        }
     }
 
-    private static void showError(Throwable t) {
-        t.printStackTrace();
+    private double dialogX, dialogY;
+
+    private void showCustomDialog(String titleStr, Parent content, String type) {
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.initOwner(application.getStage());
+
+        // Header (Title Bar)
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(5, 10, 5, 10));
+        header.setStyle("-fx-background-color: #0f0f1a; -fx-cursor: move;");
+        header.setPrefHeight(32);
+
+        ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("L2Tool.png")));
+        icon.setFitWidth(16);
+        icon.setFitHeight(16);
+
+        Label titleLbl = new Label(titleStr);
+        titleLbl.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button closeBtn = new Button("✕");
+        closeBtn.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #888; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 0 10 0 10;");
+        closeBtn.setPrefHeight(32);
+        closeBtn.setOnMouseEntered(e -> closeBtn.setStyle(
+                "-fx-background-color: #e94560; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 0 10 0 10;"));
+        closeBtn.setOnMouseExited(e -> closeBtn.setStyle(
+                "-fx-background-color: transparent; -fx-text-fill: #888; -fx-font-size: 14px; -fx-cursor: hand; -fx-padding: 0 10 0 10;"));
+        closeBtn.setOnAction(e -> stage.close());
+
+        header.getChildren().addAll(icon, titleLbl, spacer, closeBtn);
+
+        // Header Dragging
+        header.setOnMousePressed(e -> {
+            dialogX = e.getSceneX();
+            dialogY = e.getSceneY();
+        });
+        header.setOnMouseDragged(e -> {
+            stage.setX(e.getScreenX() - dialogX);
+            stage.setY(e.getScreenY() - dialogY);
+        });
+
+        // Content Area
+        VBox root = new VBox(15);
+        root.setStyle("-fx-background-color: #1a1a2e; -fx-border-color: #303050; -fx-border-width: 0 1 1 1;");
+        root.setPadding(new Insets(20));
+
+        VBox mainContent = new VBox(10);
+        mainContent.getChildren().add(content);
+
+        HBox footer = new HBox();
+        footer.setAlignment(Pos.CENTER_RIGHT);
+        Button okBtn = new Button("OK");
+        okBtn.setPrefWidth(80);
+        okBtn.setStyle(
+                "-fx-background-color: #0f3460; -fx-text-fill: white; -fx-cursor: hand; -fx-border-color: #1a5a8a; -fx-border-radius: 4; -fx-background-radius: 4;");
+        okBtn.setOnMouseEntered(e -> okBtn.setStyle(
+                "-fx-background-color: #1a5a8a; -fx-text-fill: white; -fx-cursor: hand; -fx-border-color: #2a6a9a; -fx-border-radius: 4; -fx-background-radius: 4;"));
+        okBtn.setOnMouseExited(e -> okBtn.setStyle(
+                "-fx-background-color: #0f3460; -fx-text-fill: white; -fx-cursor: hand; -fx-border-color: #1a5a8a; -fx-border-radius: 4; -fx-background-radius: 4;"));
+        okBtn.setOnAction(e -> stage.close());
+        footer.getChildren().add(okBtn);
+
+        root.getChildren().addAll(mainContent, footer);
+
+        VBox layout = new VBox(header, root);
+        Scene scene = new Scene(layout);
+        scene.setFill(null);
+        stage.setScene(scene);
+
+        // Position relative to main stage
+        if (application.getStage() != null) {
+            stage.setOnShown(e -> {
+                stage.setX(application.getStage().getX() + (application.getStage().getWidth() - stage.getWidth()) / 2);
+                stage.setY(
+                        application.getStage().getY() + (application.getStage().getHeight() - stage.getHeight()) / 2);
+            });
+        }
+
+        stage.show();
+    }
+
+    private void showError(Throwable t) {
+        System.out.println("LOG: showError() called");
+        t.printStackTrace(System.out);
 
         while (t.getCause() != null)
             t = t.getCause();
@@ -1055,7 +1186,7 @@ public class Controller implements Initializable {
         show(Alert.AlertType.ERROR, t.getClass().getSimpleName(), null, trimMessage(t.getMessage()));
     }
 
-    private static String trimMessage(String s) {
+    private String trimMessage(String s) {
         return s == null ? null : s.substring(0, Math.min(160, s.length()));
     }
 }

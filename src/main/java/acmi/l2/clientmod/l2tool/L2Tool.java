@@ -54,30 +54,27 @@ public class L2Tool extends Application {
 
         Scene scene = new Scene(parent);
         scene.getStylesheets().add(L2Tool.class.getResource("styles.css").toExternalForm());
-        
+
         stage.setTitle("L2Tool");
         stage.getIcons().add(new Image(L2Tool.class.getResourceAsStream("L2Tool.png")));
         stage.initStyle(StageStyle.UNDECORATED);
+        stage.setResizable(false);
         stage.setScene(scene);
+        stage.setMinWidth(460);
+        stage.setMinHeight(580);
+        stage.setWidth(460);
+        stage.setHeight(600);
+
         stage.show();
+
         Platform.runLater(() -> {
-            stage.setWidth(Double.parseDouble(windowPrefs().get("width", String.valueOf(stage.getWidth()))));
-            stage.setHeight(Double.parseDouble(windowPrefs().get("height", String.valueOf(stage.getHeight()))));
             if (windowPrefs().getBoolean("maximized", stage.isMaximized())) {
                 stage.setMaximized(true);
             } else {
-                Rectangle2D bounds = new Rectangle2D(
-                        Double.parseDouble(windowPrefs().get("x", String.valueOf(stage.getX()))),
-                        Double.parseDouble(windowPrefs().get("y", String.valueOf(stage.getY()))),
-                        stage.getWidth(),
-                        stage.getHeight());
-                if (Screen.getScreens()
-                        .stream()
-                        .map(Screen::getVisualBounds)
-                        .anyMatch(r -> r.intersects(bounds))) {
-                    stage.setX(bounds.getMinX());
-                    stage.setY(bounds.getMinY());
-                }
+                double savedX = Double.parseDouble(windowPrefs().get("x", String.valueOf(stage.getX())));
+                double savedY = Double.parseDouble(windowPrefs().get("y", String.valueOf(stage.getY())));
+                stage.setX(savedX);
+                stage.setY(savedY);
             }
         });
 
