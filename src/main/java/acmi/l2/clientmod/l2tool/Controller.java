@@ -713,6 +713,12 @@ public class Controller implements Initializable {
                                     continue;
                                 }
                                 
+                                // Validar que tenga mipmaps antes de procesar
+                                if (info.sizes == null || info.sizes.length == 0 || info.offsets == null || info.offsets.length == 0) {
+                                    errors++;
+                                    continue;
+                                }
+                                
                                 byte[] raw = entry.getObjectRawData();
                                 
                                 switch (info.format) {
@@ -727,12 +733,18 @@ public class Controller implements Initializable {
                                         image = imgObject.getMipMaps()[0];
                                         break;
                                     case P8:
-                                        imgObject = P8.createFromData(raw, info);
-                                        image = imgObject.getMipMaps()[0];
+                                        // Validar que tenga mipmaps antes de procesar P8
+                                        if (info.sizes.length > 0 && info.offsets.length > 0) {
+                                            imgObject = P8.createFromData(raw, info);
+                                            image = imgObject.getMipMaps()[0];
+                                        }
                                         break;
                                     case G16:
-                                        imgObject = G16.createFromData(raw, info);
-                                        image = imgObject.getMipMaps()[0];
+                                        // Validar que tenga mipmaps antes de procesar G16
+                                        if (info.sizes.length > 0 && info.offsets.length > 0) {
+                                            imgObject = G16.createFromData(raw, info);
+                                            image = imgObject.getMipMaps()[0];
+                                        }
                                         break;
                                     default:
                                         continue;
