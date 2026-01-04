@@ -226,6 +226,16 @@ public class Controller implements Initializable {
             }
         });
 
+        // Corrección visual: Restaurar el valor si desaparece al perder el foco
+        textureList.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused && textureList.getValue() == null && lastSelectedTexture != null) {
+                Platform.runLater(() -> {
+                    textureList.setValue(lastSelectedTexture);
+                    System.out.println("LOG: Visual selection restored on focus loss.");
+                });
+            }
+        });
+
         // Corregir ClassCastException del AutoComplete
         textureList.setConverter(new javafx.util.StringConverter<MipMapInfo>() {
             @Override
@@ -613,6 +623,15 @@ public class Controller implements Initializable {
 
         try (UnrealPackage utx = new UnrealPackage(new File(utxPathProperty.get()), true)) {
             File outputDir = new File("output_selected");
+
+            if (clearOutput.isSelected() && outputDir.exists()) {
+                try {
+                    deleteDirectoryContents(outputDir);
+                } catch (IOException e) {
+                    show(Alert.AlertType.ERROR, "Error", null, "Could not clear output folder: " + e.getMessage());
+                }
+            }
+
             if (!outputDir.exists())
                 outputDir.mkdirs();
 
@@ -636,7 +655,17 @@ public class Controller implements Initializable {
                 extension = ".dds";
             }
 
-            File outputFile = new File(outputDir, info.name + extension);
+            String textureName;
+            if (keepStructure.isSelected()) {
+                UnrealPackage.ExportEntry entry = utx.getExportTable().get(info.exportIndex);
+                textureName = fixPath(entry.getObjectFullName());
+            } else {
+                textureName = info.name;
+            }
+
+            File outputFile = new File(outputDir, textureName + extension);
+            createParentDirectories(outputFile);
+
             System.out.println("LOG: Exporting " + info.name + " to " + outputFile.getAbsolutePath());
 
             if (format.equals("dds")) {
@@ -644,7 +673,6 @@ public class Controller implements Initializable {
                 DDS.createFromData(texture.getObjectRawData(), info).write(outputFile);
             } else {
                 BufferedImage image = loadUtxImage(info);
-                // Conversiones de compatibilidad similares a exportAll
                 BufferedImage writeImage = image;
                 if (format.equals("jpg") && writeImage.getType() != BufferedImage.TYPE_INT_RGB) {
                     BufferedImage rgbImage = new BufferedImage(writeImage.getWidth(), writeImage.getHeight(),
@@ -730,14 +758,14 @@ public class Controller implements Initializable {
                 try {
                     deleteDirectoryContents(outputDir);
                 } catch (IOException e) {
-                    show(Alert.AlertType.ERROR, "Error", null, "Could not clear output folder: " + e.getMessage());
+                    show(Alert.AlertType.ERROR, "Error", null, "Could not clear output_all folder: " + e.getMessage());
                     return;
                 }
             }
 
             if (!outputDir.exists()) {
                 if (!outputDir.mkdirs()) {
-                    show(Alert.AlertType.ERROR, "Error", null, "Could not create the 'output' folder.");
+                    show(Alert.AlertType.ERROR, "Error", null, "Could not create the 'output_all' folder.");
                     return;
                 }
             }
